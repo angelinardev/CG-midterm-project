@@ -164,13 +164,16 @@ bool DrawSaveLoadImGui(Scene::Sptr& scene, std::string& path) {
 	// Draw a save button, and save when pressed
 	if (ImGui::Button("Save")) {
 		scene->Save(path);
+		std::string newFilename = std::filesystem::path(path).stem().string() + "-manifest.json";
+		ResourceManager::SaveManifest(newFilename);
 	}
 	ImGui::SameLine();
 	// Load scene from file button
 	if (ImGui::Button("Load")) {
 		// Since it's a reference to a ptr, this will
 		// overwrite the existing scene!
-		scene = nullptr;
+		std::string newFilename = std::filesystem::path(path).stem().string() + "-manifest.json";
+		ResourceManager::LoadManifest(newFilename);
 		scene = Scene::Load(path);
 
 		return true;
@@ -251,9 +254,9 @@ int main() {
 
 	// Register all our resource types so we can load them from manifest files
 	ResourceManager::RegisterType<Texture2D>();
+	ResourceManager::RegisterType<Shader>();
 	ResourceManager::RegisterType<Material>();
 	ResourceManager::RegisterType<MeshResource>();
-	ResourceManager::RegisterType<Shader>();
 
 	// Register all of our component types so we can load them from files
 	ComponentManager::RegisterType<Camera>();
@@ -270,12 +273,14 @@ int main() {
 	glCullFace(GL_BACK);
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 
-	bool loadScene = false;
+	bool loadScene = true;
 	// For now we can use a toggle to generate our scene vs load from file
 	if (loadScene) {
-		ResourceManager::LoadManifest("manifest.json");
-		scene = Scene::Load("scene.json");
-	} 
+		ResourceManager::LoadManifest("scene1-manifest.json");
+		
+		scene = Scene::Load("scene1.json");
+		
+	}
 	else {
 		// Create our OpenGL resources
 		Shader::Sptr uboShader = ResourceManager::CreateAsset<Shader>(std::unordered_map<ShaderPartType, std::string>{

@@ -118,5 +118,5 @@ protected:
 	/// </summary>
 	static std::map<std::string, std::function<Guid(const nlohmann::json&)>> _typeLoaders;
 
-	static nlohmann::json _manifest;
+	static nlohmann::ordered_json _manifest;
 };

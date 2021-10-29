@@ -58,7 +58,7 @@
 #include "Gameplay/Physics/Colliders/SphereCollider.h"
 #include "Gameplay/Physics/Colliders/ConvexMeshCollider.h"
 #include "Gameplay/Physics/TriggerVolume.h"
-#include "../../Sandbox/src/Graphics/DebugDraw.h"
+#include "Graphics/DebugDraw.h"
 
 //#define LOG_GL_NOTIFICATIONS
 
@@ -203,7 +203,30 @@ bool DrawLightImGui(const Scene::Sptr& scene, const char* title, int ix) {
 	ImGui::PopID();
 	return result;
 }
+GLfloat movX = 0.0f;
 
+int count = 0;
+void keyboard() {
+
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		movX -= 0.1f;
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		movX += 0.1f;
+}
+
+
+//RenderObject createBrick(glm::vec3 pos)
+//{
+//	RenderObject blockM = RenderObject();
+//	blockM.Position = pos;
+//	blockM.Rotation.z = 180.0f;
+//	blockM.Rotation.x = 45.0f;
+//	blockM.Name = "Block" + std::to_string(count);
+//	blockM.Scale = glm::vec3(0.3f, 0.3f, 0.3f);
+//	count += 1;
+//	return blockM;
+//
+//}
 int main() {
 	Logger::Init(); // We'll borrow the logger from the toolkit, but we need to initialize it
 
@@ -260,9 +283,12 @@ int main() {
 			{ ShaderPartType::Fragment, "shaders/frag_blinn_phong_textured.glsl" }
 		}); 
 
-		MeshResource::Sptr monkeyMesh = ResourceManager::CreateAsset<MeshResource>("Monkey.obj");
-		Texture2D::Sptr    boxTexture = ResourceManager::CreateAsset<Texture2D>("textures/box-diffuse.png");
-		Texture2D::Sptr    monkeyTex  = ResourceManager::CreateAsset<Texture2D>("textures/monkey-uvMap.png");  
+		MeshResource::Sptr playerMesh = ResourceManager::CreateAsset<MeshResource>("Player.obj");
+		Texture2D::Sptr playerTex = ResourceManager::CreateAsset<Texture2D>("textures/Player.png");
+
+		MeshResource::Sptr ballMesh = ResourceManager::CreateAsset<MeshResource>("ball.obj");
+		Texture2D::Sptr ballTex = ResourceManager::CreateAsset<Texture2D>("textures/Player.png");
+
 		
 		// Create an empty scene
 		scene = std::make_shared<Scene>();
@@ -270,31 +296,32 @@ int main() {
 		// I hate this
 		scene->BaseShader = uboShader;
 
-		// Create our materials
-		Material::Sptr boxMaterial = ResourceManager::CreateAsset<Material>();
+		// Create our material
+		Material::Sptr playerMaterial = ResourceManager::CreateAsset<Material>();
 		{
-			boxMaterial->Name = "Box";
-			boxMaterial->MatShader = scene->BaseShader;
-			boxMaterial->Texture = boxTexture;
-			boxMaterial->Shininess = 2.0f;
-		}	
-
-		Material::Sptr monkeyMaterial = ResourceManager::CreateAsset<Material>();
+			playerMaterial->Name = "Player";
+			playerMaterial->MatShader = scene->BaseShader;
+			playerMaterial->Texture = playerTex;
+			playerMaterial->Shininess = 1.0f;
+			
+		}
+		Material::Sptr ballMaterial = ResourceManager::CreateAsset<Material>();
 		{
-			monkeyMaterial->Name = "Monkey";
-			monkeyMaterial->MatShader = scene->BaseShader;
-			monkeyMaterial->Texture = monkeyTex;
-			monkeyMaterial->Shininess = 256.0f;
+			ballMaterial->Name = "Ball";
+			ballMaterial->MatShader = scene->BaseShader;
+			ballMaterial->Texture = playerTex;
+			ballMaterial->Shininess = 1.0f;
 
 		}
 
+
 		// Create some lights for our scene
 		scene->Lights.resize(3);
-		scene->Lights[0].Position = glm::vec3(0.0f, 1.0f, 3.0f);
+		scene->Lights[0].Position = glm::vec3(0.0f, 8.50f, 3.0f);
 		scene->Lights[0].Color = glm::vec3(0.5f, 0.0f, 0.7f);
 		scene->Lights[0].Range = 10.0f;
 
-		scene->Lights[1].Position = glm::vec3(1.0f, 0.0f, 3.0f);
+		scene->Lights[1].Position = glm::vec3(1.0f, 5.0f, 3.0f);
 		scene->Lights[1].Color = glm::vec3(0.2f, 0.8f, 0.1f);
 
 		scene->Lights[2].Position = glm::vec3(0.0f, 1.0f, 3.0f);
@@ -312,95 +339,144 @@ int main() {
 			camera->LookAt(glm::vec3(0.0f));
 
 			Camera::Sptr cam = camera->Add<Camera>();
-
+			cam->SetOrthoEnabled(true);
+			cam->SetOrthoVerticalScale(10.0f);
 			// Make sure that the camera is set as the scene's main camera!
 			scene->MainCamera = cam;
+			
 		}
 
 		// Set up all our sample objects
-		GameObject::Sptr plane = scene->CreateGameObject("Plane");
+		//GameObject::Sptr plane = scene->CreateGameObject("Plane");
+		//{
+		//	// Scale up the plane
+		//	plane->SetScale(glm::vec3(10.0F));
+
+		//	// Create and attach a RenderComponent to the object to draw our mesh
+		//	RenderComponent::Sptr renderer = plane->Add<RenderComponent>();
+		//	renderer->SetMesh(planeMesh);
+		//	renderer->SetMaterial(boxMaterial);
+
+		//	// Attach a plane collider that extends infinitely along the X/Y axis
+		//	RigidBody::Sptr physics = plane->Add<RigidBody>(/*static by default*/);
+		//	physics->AddCollider(PlaneCollider::Create());
+		//}
+
+		//GameObject::Sptr square = scene->CreateGameObject("Square");
+		//{
+		//	// Set position in the scene
+		//	square->SetPostion(glm::vec3(0.0f, 0.0f, 2.0f));
+		//	// Scale down the plane
+		//	square->SetScale(glm::vec3(0.5f));
+
+		//	// Create and attach a render component
+		//	RenderComponent::Sptr renderer = square->Add<RenderComponent>();
+		//	renderer->SetMesh(planeMesh);
+		//	renderer->SetMaterial(boxMaterial);
+
+		//	// This object is a renderable only, it doesn't have any behaviours or
+		//	// physics bodies attached!
+		//}
+
+		//GameObject::Sptr monkey1 = scene->CreateGameObject("Monkey 1");
+		//{
+		//	// Set position in the scene
+		//	monkey1->SetPostion(glm::vec3(1.5f, 0.0f, 1.0f));
+
+		//	// Add some behaviour that relies on the physics body
+		//	monkey1->Add<JumpBehaviour>();
+
+		//	// Create and attach a renderer for the monkey
+		//	RenderComponent::Sptr renderer = monkey1->Add<RenderComponent>();
+		//	renderer->SetMesh(monkeyMesh);
+		//	renderer->SetMaterial(monkeyMaterial);
+
+		//	// Add a dynamic rigid body to this monkey
+		//	RigidBody::Sptr physics = monkey1->Add<RigidBody>(RigidBodyType::Dynamic);
+		//	physics->AddCollider(ConvexMeshCollider::Create());
+
+
+		//	// We'll add a behaviour that will interact with our trigger volumes
+		//	MaterialSwapBehaviour::Sptr triggerInteraction = monkey1->Add<MaterialSwapBehaviour>();
+		//	triggerInteraction->EnterMaterial = boxMaterial;
+		//	triggerInteraction->ExitMaterial = monkeyMaterial;
+		//}
+
+		//GameObject::Sptr monkey2 = scene->CreateGameObject("Complex Object");
+		//{
+		//	// Set and rotation position in the scene
+		//	monkey2->SetPostion(glm::vec3(-1.5f, 0.0f, 1.0f));
+		//	monkey2->SetRotation(glm::vec3(90.0f, 0.0f, 0.0f));
+
+		//	// Add a render component
+		//	RenderComponent::Sptr renderer = monkey2->Add<RenderComponent>();
+		//	renderer->SetMesh(monkeyMesh);
+		//	renderer->SetMaterial(boxMaterial);
+
+
+
+		//	// This is an example of attaching a component and setting some parameters
+		//	RotatingBehaviour::Sptr behaviour = monkey2->Add<RotatingBehaviour>();
+		//	behaviour->RotationSpeed = glm::vec3(0.0f, 0.0f, -90.0f);
+		//}
+
+		GameObject::Sptr playerM = scene->CreateGameObject("Player");
 		{
-			// Scale up the plane
-			plane->SetScale(glm::vec3(10.0F));
-
-			// Create and attach a RenderComponent to the object to draw our mesh
-			RenderComponent::Sptr renderer = plane->Add<RenderComponent>();
-			renderer->SetMesh(planeMesh);
-			renderer->SetMaterial(boxMaterial);
-
-			// Attach a plane collider that extends infinitely along the X/Y axis
-			RigidBody::Sptr physics = plane->Add<RigidBody>(/*static by default*/);
-			physics->AddCollider(PlaneCollider::Create());
-		}
-
-		GameObject::Sptr square = scene->CreateGameObject("Square");
-		{
-			// Set position in the scene
-			square->SetPostion(glm::vec3(0.0f, 0.0f, 2.0f));
-			// Scale down the plane
-			square->SetScale(glm::vec3(0.5f));
-
-			// Create and attach a render component
-			RenderComponent::Sptr renderer = square->Add<RenderComponent>();
-			renderer->SetMesh(planeMesh);
-			renderer->SetMaterial(boxMaterial);
-
-			// This object is a renderable only, it doesn't have any behaviours or
-			// physics bodies attached!
-		}
-
-		GameObject::Sptr monkey1 = scene->CreateGameObject("Monkey 1");
-		{
-			// Set position in the scene
-			monkey1->SetPostion(glm::vec3(1.5f, 0.0f, 1.0f));
-
-			// Add some behaviour that relies on the physics body
-			monkey1->Add<JumpBehaviour>();
-
-			// Create and attach a renderer for the monkey
-			RenderComponent::Sptr renderer = monkey1->Add<RenderComponent>();
-			renderer->SetMesh(monkeyMesh);
-			renderer->SetMaterial(monkeyMaterial);
-
+			playerM->SetPostion(glm::vec3(-1.5f, -5.0f, 1.0f));
+			playerM->SetRotation(glm::vec3(0.0f, 0.0f, 180.0f));
+			playerM->SetScale(glm::vec3(0.4f, 0.4f, 0.4f));
+			// Add a render component
+			RenderComponent::Sptr renderer = playerM->Add<RenderComponent>();
+			renderer->SetMesh(playerMesh);
+			renderer->SetMaterial(playerMaterial);
 			// Add a dynamic rigid body to this monkey
-			RigidBody::Sptr physics = monkey1->Add<RigidBody>(RigidBodyType::Dynamic);
+			RigidBody::Sptr physics = playerM->Add<RigidBody>(RigidBodyType::Dynamic);
 			physics->AddCollider(ConvexMeshCollider::Create());
 
-
 			// We'll add a behaviour that will interact with our trigger volumes
-			MaterialSwapBehaviour::Sptr triggerInteraction = monkey1->Add<MaterialSwapBehaviour>();
-			triggerInteraction->EnterMaterial = boxMaterial;
-			triggerInteraction->ExitMaterial = monkeyMaterial;
+			//MaterialSwapBehaviour::Sptr triggerInteraction = playerM->Add<MaterialSwapBehaviour>();
+			//triggerInteraction->EnterMaterial = boxMaterial;
+			//triggerInteraction->ExitMaterial = monkeyMaterial;
 		}
-
-		GameObject::Sptr monkey2 = scene->CreateGameObject("Complex Object");
+		GameObject::Sptr ballM = scene->CreateGameObject("Ball");
 		{
-			// Set and rotation position in the scene
-			monkey2->SetPostion(glm::vec3(-1.5f, 0.0f, 1.0f));
-			monkey2->SetRotation(glm::vec3(90.0f, 0.0f, 0.0f));
-
+			ballM->SetPostion(glm::vec3(-1.5f, 0.0f, 1.0f));
+			ballM->SetRotation(glm::vec3(0.0f, 0.0f, 180.0f));
+			ballM->SetScale(glm::vec3(0.6f, 0.6f, 0.6f));
 			// Add a render component
-			RenderComponent::Sptr renderer = monkey2->Add<RenderComponent>();
-			renderer->SetMesh(monkeyMesh);
-			renderer->SetMaterial(boxMaterial);
+			RenderComponent::Sptr renderer = ballM->Add<RenderComponent>();
+			renderer->SetMesh(ballMesh);
+			renderer->SetMaterial(ballMaterial);
+			// Add a dynamic rigid body to this monkey
+			RigidBody::Sptr physics = ballM->Add<RigidBody>(RigidBodyType::Dynamic);
+			SphereCollider::Sptr sphere = SphereCollider::Create();
+			sphere->SetPosition(ballM->GetPosition());
+			physics->AddCollider(sphere);
 
-			// This is an example of attaching a component and setting some parameters
-			RotatingBehaviour::Sptr behaviour = monkey2->Add<RotatingBehaviour>();
-			behaviour->RotationSpeed = glm::vec3(0.0f, 0.0f, -90.0f);
+			
+			// We'll add a behaviour that will interact with our trigger volumes
+			//MaterialSwapBehaviour::Sptr triggerInteraction = ballM->Add<MaterialSwapBehaviour>();
+			//triggerInteraction->EnterMaterial = boxMaterial;
+			//triggerInteraction->ExitMaterial = monkeyMaterial;
+			TriggerVolume::Sptr triggerInteration = ballM->Add<TriggerVolume>();
+			triggerInteration->AddCollider(sphere);
+			//triggerInteration->
 		}
+
 
 		// Kinematic rigid bodies are those controlled by some outside controller
 		// and ONLY collide with dynamic objects
-		RigidBody::Sptr physics = monkey2->Add<RigidBody>(RigidBodyType::Kinematic);
-		physics->AddCollider(ConvexMeshCollider::Create());
+		//RigidBody::Sptr physics = monkey2->Add<RigidBody>(RigidBodyType::Kinematic);
+		//physics->AddCollider(ConvexMeshCollider::Create());
 
 		// Create a trigger volume for testing how we can detect collisions with objects!
-		GameObject::Sptr trigger = scene->CreateGameObject("Trigger"); 
+		//GameObject::Sptr trigger = scene->CreateGameObject("Trigger"); 
 		{
-			TriggerVolume::Sptr volume = trigger->Add<TriggerVolume>();
-			BoxCollider::Sptr collider = BoxCollider::Create(glm::vec3(3.0f, 3.0f, 1.0f));
-			collider->SetPosition(glm::vec3(0.0f, 0.0f, 0.5f));
-			volume->AddCollider(collider);
+			//TriggerVolume::Sptr volume = trigger->Add<TriggerVolume>();
+			/*BoxCollider::Sptr collider = BoxCollider::Create(glm::vec3(3.0f, 3.0f, 1.0f));
+			collider->SetPosition(glm::vec3(0.0f, 0.0f, 0.5f));*/
+			// Add a dynamic rigid body to ball
+			//volume->AddCollider(collider);
 		}
 
 		// Save the asset manifest for all the resources we just loaded
@@ -431,6 +507,19 @@ int main() {
 
 	nlohmann::json editorSceneState;
 
+	//block stuff 
+	MeshResource::Sptr blockMesh = ResourceManager::CreateAsset<MeshResource>("Brick.obj");
+	Texture2D::Sptr blockTex = ResourceManager::CreateAsset<Texture2D>("textures/Brick1.png");
+	//create material 
+	Material::Sptr blockMaterial = ResourceManager::CreateAsset<Material>();
+	{
+		blockMaterial->Name = "Block";
+		blockMaterial->MatShader = scene->BaseShader;
+		blockMaterial->Texture = blockTex;
+		blockMaterial->Shininess = 1.0f;
+	}
+	GameObject::Sptr playerM = scene->FindObjectByName("Player");
+
 	///// Game loop /////
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -442,6 +531,33 @@ int main() {
 
 		// Showcasing how to use the imGui library!
 		bool isDebugWindowOpen = ImGui::Begin("Debugging");
+		if (isDebugWindowOpen)
+		{
+			if (ImGui::Button("Add brick"))
+			{
+				count += 1;
+				GameObject::Sptr blockM = scene->CreateGameObject("Block" + std::to_string(count));
+				{
+					blockM->SetPostion(glm::vec3(-1.5f, 0.0f, 1.0f));
+					blockM->SetRotation(glm::vec3(45.0f, 0.0f, 180.0f));
+					blockM->SetScale(glm::vec3(0.3f, 0.3f, 0.3f));
+					// Add a render component
+					RenderComponent::Sptr renderer = blockM->Add<RenderComponent>();
+					renderer->SetMesh(blockMesh);
+					renderer->SetMaterial(blockMaterial);
+					// Add a dynamic rigid body to this block
+					RigidBody::Sptr physics = blockM->Add<RigidBody>(RigidBodyType::Kinematic);
+					physics->AddCollider(ConvexMeshCollider::Create());
+					// We'll add a behaviour that will interact with our trigger volumes
+					MaterialSwapBehaviour::Sptr triggerInteraction = blockM->Add<MaterialSwapBehaviour>();
+					//triggerInteraction->EnterMaterial = boxMaterial;
+					//triggerInteraction->ExitMaterial = monkeyMaterial;
+					//number of objects 
+					
+				}
+			}
+			ImGui::Separator();
+		}
 		if (isDebugWindowOpen) {
 			// Draws a button to control whether or not the game is currently playing
 			static char buttonLabel[64];
@@ -520,6 +636,10 @@ int main() {
 
 		dt *= playbackSpeed;
 
+		//move player
+		keyboard();
+		playerM->SetPostion(glm::vec3(movX, 5.0f, 1.0f));
+		
 		// Perform updates for all components
 		scene->Update(dt);
 

@@ -548,6 +548,30 @@ bool DrawLightImGui(const char* title, Light& light) {
 ////////////////// END OF NEW ////////////////////////
 //////////////////////////////////////////////////////
 
+GLfloat movX = 0.0f;
+
+int count = 0;
+void keyboard() {
+	
+	if (glfwGetKey(window,GLFW_KEY_A) == GLFW_PRESS)
+		movX -= 0.1f;
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		movX += 0.1f;
+}
+
+
+RenderObject createBrick(glm::vec3 pos)
+{
+	RenderObject blockM = RenderObject();
+	blockM.Position = pos;
+	blockM.Rotation.z = 180.0f;
+	blockM.Rotation.x = 45.0f;
+	blockM.Name = "Block" + std::to_string(count);
+	blockM.Scale = glm::vec3(0.3f, 0.3f, 0.3f);
+	count += 1;
+	return blockM;
+	
+}
 int main() {
 	Logger::Init(); // We'll borrow the logger from the toolkit, but we need to initialize it
 
@@ -578,7 +602,7 @@ int main() {
 
 	// The scene that we will be rendering
 	Scene::Sptr scene = nullptr;
-
+	
 	bool loadScene = false;
 	// For now we can use a toggle to generate our scene vs load from file
 	if (loadScene) {
@@ -591,11 +615,12 @@ int main() {
 			{ ShaderPartType::Vertex, "shaders/vertex_shader.glsl" },
 			{ ShaderPartType::Fragment, "shaders/frag_blinn_phong_textured.glsl" }
 		});
-		Guid monkeyMesh = ResourceManager::CreateMesh("Monkey.obj");
-		Guid carMesh = ResourceManager::CreateMesh("car.obj");
-		Guid boxTexture = ResourceManager::CreateTexture("textures/box-diffuse.png");
-		Guid monkeyTex  = ResourceManager::CreateTexture("textures/monkey-uvMap.png");
-		Guid carTex = ResourceManager::CreateTexture("textures/car_uv.png");
+		
+		Guid playerMesh = ResourceManager::CreateMesh("Player.obj");
+		Guid playerTex = ResourceManager::CreateTexture("textures/Player.png");
+		
+		
+		
 		// Save the asset manifest for all the resources we just loaded
 		ResourceManager::SaveManifest("manifest.json");
 
@@ -606,32 +631,20 @@ int main() {
 		scene->BaseShader = ResourceManager::GetShader(defaultShader);
 
 		// Create our materials
-		MaterialInfo::Sptr boxMaterial = std::make_shared<MaterialInfo>();
-		boxMaterial->Shader = scene->BaseShader;
-		boxMaterial->Texture = ResourceManager::GetTexture(boxTexture);
-		boxMaterial->Shininess = 8.0f;
-		scene->Materials[boxMaterial->GetGUID()] = boxMaterial;
-
-		MaterialInfo::Sptr monkeyMaterial = std::make_shared<MaterialInfo>();
-		monkeyMaterial->Shader = scene->BaseShader;
-		monkeyMaterial->Texture = ResourceManager::GetTexture(monkeyTex);
-		monkeyMaterial->Shininess = 1.0f;
-		scene->Materials[monkeyMaterial->GetGUID()] = monkeyMaterial;
-
-		MaterialInfo::Sptr carMaterial = std::make_shared<MaterialInfo>();
-		carMaterial->Shader = scene->BaseShader;
-		carMaterial->Texture = ResourceManager::GetTexture(carTex);
-		carMaterial->Shininess = 1.0f;
-		scene->Materials[carMaterial->GetGUID()] = carMaterial;
-
+		MaterialInfo::Sptr playerMaterial = std::make_shared<MaterialInfo>();
+		playerMaterial->Shader = scene->BaseShader;
+		playerMaterial->Texture = ResourceManager::GetTexture(playerTex);
+		playerMaterial->Shininess = 1.0f;
+		scene->Materials[playerMaterial->GetGUID()] = playerMaterial;
+		
 		// Create some lights for our scene
 		scene->Lights.resize(3);
-		scene->Lights[0].Position = glm::vec3(0.0f, 1.0f, 3.0f);
+		scene->Lights[0].Position = glm::vec3(0.0f, 8.50f, 3.0f);
 		scene->Lights[0].Color = glm::vec3(0.5f, 0.0f, 0.7f);
 		scene->Lights[0].Range = 100.0f;
 		scene->Lights[0].Attenuation = 1.0f / (1 + scene->Lights[0].Range);
 
-		scene->Lights[1].Position = glm::vec3(1.0f, 0.0f, 3.0f);
+		scene->Lights[1].Position = glm::vec3(1.0f, 5.0f, 3.0f);
 		scene->Lights[1].Color = glm::vec3(0.2f, 0.8f, 0.1f);
 		scene->Lights[1].Range = 100.0f;
 		scene->Lights[1].Attenuation = 1.0f / (1 + scene->Lights[1].Range);
@@ -647,54 +660,42 @@ int main() {
 		scene->Camera->LookAt(glm::vec3(0.0f));
 
 		// Set up all our sample objects
-		RenderObject plane = RenderObject();
-		plane.MeshBuilderParams.push_back(MeshBuilderParam::CreatePlane(ZERO, UNIT_Z, UNIT_X, glm::vec2(10.0f)));
-		plane.GenerateMesh();
-		plane.Name = "Plane";
-		plane.Material = boxMaterial;
-		scene->Objects.push_back(plane);
+		
 
-		RenderObject square = RenderObject();
-		square.MeshBuilderParams.push_back(MeshBuilderParam::CreatePlane(ZERO, UNIT_Z, UNIT_X, glm::vec2(0.5f)));
-		square.GenerateMesh();
-		square.Position = glm::vec3(0.0f, 0.0f, 2.0f);
-		square.Name = "Square";
-		square.Material = boxMaterial;
-		scene->Objects.push_back(square);
-
-		RenderObject monkey1 = RenderObject();
-		monkey1.Position = glm::vec3(1.5f, 0.0f, 1.0f);
-		monkey1.Mesh     = ResourceManager::GetMesh(monkeyMesh);
-		monkey1.Material = monkeyMaterial;
-		monkey1.Name = "Monkey 1";
-		scene->Objects.push_back(monkey1);
-
-		RenderObject monkey2 = RenderObject();
-		monkey2.Position = glm::vec3(-1.5f, 0.0f, 1.0f);
-		monkey2.Mesh     = ResourceManager::GetMesh(monkeyMesh);
-		monkey2.Material = monkeyMaterial;
-		monkey2.Rotation.z = 180.0f;
-		monkey2.Name = "Monkey 2";
-		scene->Objects.push_back(monkey2);
-
-		RenderObject carM = RenderObject();
-		carM.Position = glm::vec3(-1.5f, 0.0f, 1.0f);
-		carM.Mesh = ResourceManager::GetMesh(carMesh);
-		carM.Material = carMaterial;
-		carM.Rotation.z = 180.0f;
-		carM.Name = "Car";
-		scene->Objects.push_back(carM);
+		RenderObject playerM = RenderObject();
+		playerM.Position = glm::vec3(-1.5f, 0.0f, 1.0f);
+		playerM.Mesh = ResourceManager::GetMesh(playerMesh);
+		playerM.Material = playerMaterial;
+		playerM.Rotation.z = 180.0f;
+		playerM.Name = "Player";
+		playerM.Scale = glm::vec3(0.4f, 0.4f, 0.4f);
+		scene->Objects.push_back(playerM);
 
 		// Save the scene to a JSON file
 		scene->Save("scene.json");
 	}
-
+	
 	// Post-load setup
 	SetupShaderAndLights(scene->BaseShader, scene->Lights.data(), scene->Lights.size());
+	//block stuff
+	Guid blockMesh = ResourceManager::CreateMesh("Brick.obj");
+	Guid blockTex = ResourceManager::CreateTexture("textures/Brick1.png");
+	//create material
+	MaterialInfo::Sptr blockMaterial = std::make_shared<MaterialInfo>();
+	blockMaterial->Shader = scene->BaseShader;
+	blockMaterial->Texture = ResourceManager::GetTexture(blockTex);
+	blockMaterial->Shininess = 1.0f;
+	scene->Materials[blockMaterial->GetGUID()] = blockMaterial;
+	//example of mass creating bricks
+	RenderObject b1 = createBrick(glm::vec3(-1.1399999856948853f, 6.190000057220459f, 1.0f));
+	b1.Material = blockMaterial;
+	b1.Mesh = ResourceManager::GetMesh(blockMesh);
+	scene->Objects.push_back(b1);
 
-	RenderObject* monkey1 = scene->FindObjectByName("Monkey 1");
-	RenderObject* monkey2 = scene->FindObjectByName("Monkey 2");
-	RenderObject* carM = scene->FindObjectByName("Car");
+
+
+	RenderObject* playerM = scene->FindObjectByName("Player");
+	RenderObject* blockM = scene->FindObjectByName("Block");
 	// We'll use this to allow editing the save/load path
 	// via ImGui, note the reserve to allocate extra space
 	// for input!
@@ -705,6 +706,10 @@ int main() {
 
 	// Our high-precision timer
 	double lastFrame = glfwGetTime();
+
+	/*bool SpacePressed = false;
+
+	bool ortho = false;*/
 
 	///// Game loop /////
 	while (!glfwWindowShouldClose(window)) {
@@ -717,6 +722,25 @@ int main() {
 
 		// Showcasing how to use the imGui library!
 		bool isDebugWindowOpen = ImGui::Begin("Debugging");
+
+		if (isDebugWindowOpen)
+		{
+			if (ImGui::Button("Add brick"))
+			{
+				RenderObject blockM = RenderObject();
+				blockM.Position = glm::vec3(-1.5f, 0.0f, 1.0f);
+				blockM.Mesh = ResourceManager::GetMesh(blockMesh);
+				blockM.Material = blockMaterial;
+				blockM.Rotation.z = 180.0f;
+				blockM.Rotation.x = 45.0f;
+				blockM.Name = "Block" +std::to_string(count);
+				blockM.Scale = glm::vec3(0.3f, 0.3f, 0.3f);
+				scene->Objects.push_back(blockM);
+				//number of objects
+				count += 1;
+			}
+			ImGui::Separator();
+		}
 		if (isDebugWindowOpen) {
 			// Make a checkbox for the monkey rotation
 			ImGui::Checkbox("Rotating", &isRotating);
@@ -728,18 +752,16 @@ int main() {
 				SetupShaderAndLights(scene->BaseShader, scene->Lights.data(), scene->Lights.size());
 
 				// Re-fetch the monkeys so we can do a behaviour for them
-				monkey1 = scene->FindObjectByName("Monkey 1");
-				monkey2 = scene->FindObjectByName("Monkey 2");
-				carM = scene->FindObjectByName("Car");
+				
+				playerM = scene->FindObjectByName("Player");
 			}
 			ImGui::Separator();
 		}
 
-		// Rotate our models around the z axis at 90 deg per second
-		if (isRotating) {
-			monkey1->Rotation += glm::vec3(0.0f, 0.0f, dt * 90.0f);
-			monkey2->Rotation -= glm::vec3(0.0f, 0.0f, dt * 90.0f); 
-		}
+		keyboard();
+		playerM->Position = glm::vec3(movX, -5.0f, 1.0f);
+		
+
 
 		// Clear the color and depth buffers
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -747,6 +769,24 @@ int main() {
 		// Grab shorthands to the camera and shader from the scene
 		Shader::Sptr shader = scene->BaseShader;
 		Camera::Sptr camera = scene->Camera;
+		/*if (glfwGetKey(window, GLFW_KEY_SPACE)) {
+			if (!SpacePressed) {
+				ortho = !ortho;
+			}
+			SpacePressed = true;
+		}
+		else {
+			SpacePressed = false;
+		}*/
+
+		//if (ortho == true) {
+		camera->SetOrthoEnabled(true);
+		camera->SetOrthoVerticalScale(10.0f);
+
+		/*else {
+			camera->SetOrthoEnabled(false);
+			camera->SetPosition(glm::vec3(0, 3, 3));
+		}*/
 
 		// Bind our shader for use
 		shader->Bind();

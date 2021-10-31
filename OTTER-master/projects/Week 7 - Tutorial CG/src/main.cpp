@@ -101,6 +101,10 @@ glm::ivec2 windowSize = glm::ivec2(800, 800);
 // The title of our GLFW window
 std::string windowTitle = "INFR-1350U";
 
+
+//PLAYER SCORE
+int score = 0;
+
 // using namespace should generally be avoided, and if used, make sure it's ONLY in cpp files
 using namespace Gameplay;
 using namespace Gameplay::Physics;
@@ -212,9 +216,9 @@ int count = 0;
 void keyboard() {
 
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		movX -= 0.1f;
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		movX += 0.1f;
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		movX -= 0.1f;
 }
 
 
@@ -273,12 +277,12 @@ int main() {
 	glCullFace(GL_BACK);
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 
-	bool loadScene = true;
+	bool loadScene = false;
 	// For now we can use a toggle to generate our scene vs load from file
 	if (loadScene) {
-		ResourceManager::LoadManifest("scene1-manifest.json");
+		ResourceManager::LoadManifest("scene-manifest.json");
 		
-		scene = Scene::Load("scene1.json");
+		scene = Scene::Load("scene.json");
 		
 	}
 	else {
@@ -314,7 +318,7 @@ int main() {
 		{
 			ballMaterial->Name = "Ball";
 			ballMaterial->MatShader = scene->BaseShader;
-			ballMaterial->Texture = playerTex;
+			ballMaterial->Texture =ballTex;
 			ballMaterial->Shininess = 1.0f;
 
 		}
@@ -435,13 +439,15 @@ int main() {
 			renderer->SetMesh(playerMesh);
 			renderer->SetMaterial(playerMaterial);
 			// Add a dynamic rigid body to this monkey
-			RigidBody::Sptr physics = playerM->Add<RigidBody>(RigidBodyType::Dynamic);
-			physics->AddCollider(ConvexMeshCollider::Create());
+			RigidBody::Sptr physics = playerM->Add<RigidBody>(RigidBodyType::Kinematic);
+			BoxCollider::Sptr box = BoxCollider::Create();
+			box->SetPosition(playerM->GetPosition());
+			box->SetScale(glm::vec3(1.0f, 0.5f, 1.0f));
+			//physics->AddCollider(box);
+			physics->AddCollider(BoxCollider::Create());
+			physics->SetMass(0.0f);
 
-			// We'll add a behaviour that will interact with our trigger volumes
-			//MaterialSwapBehaviour::Sptr triggerInteraction = playerM->Add<MaterialSwapBehaviour>();
-			//triggerInteraction->EnterMaterial = boxMaterial;
-			//triggerInteraction->ExitMaterial = monkeyMaterial;
+
 		}
 		GameObject::Sptr ballM = scene->CreateGameObject("Ball");
 		{
@@ -456,15 +462,17 @@ int main() {
 			RigidBody::Sptr physics = ballM->Add<RigidBody>(RigidBodyType::Dynamic);
 			SphereCollider::Sptr sphere = SphereCollider::Create();
 			sphere->SetPosition(ballM->GetPosition());
-			physics->AddCollider(sphere);
-
+			//sphere->SetRadius(0.6f);
+			//physics->AddCollider(sphere);
+			physics->AddCollider(SphereCollider::Create());
 			
 			// We'll add a behaviour that will interact with our trigger volumes
 			//MaterialSwapBehaviour::Sptr triggerInteraction = ballM->Add<MaterialSwapBehaviour>();
 			//triggerInteraction->EnterMaterial = boxMaterial;
 			//triggerInteraction->ExitMaterial = monkeyMaterial;
-			TriggerVolume::Sptr triggerInteration = ballM->Add<TriggerVolume>();
-			triggerInteration->AddCollider(sphere);
+			//TriggerVolume::Sptr triggerInteration = ballM->Add<TriggerVolume>();
+			//triggerInteration->AddCollider(sphere);
+			
 			//triggerInteration->
 		}
 
@@ -476,13 +484,13 @@ int main() {
 
 		// Create a trigger volume for testing how we can detect collisions with objects!
 		//GameObject::Sptr trigger = scene->CreateGameObject("Trigger"); 
-		{
-			//TriggerVolume::Sptr volume = trigger->Add<TriggerVolume>();
-			/*BoxCollider::Sptr collider = BoxCollider::Create(glm::vec3(3.0f, 3.0f, 1.0f));
-			collider->SetPosition(glm::vec3(0.0f, 0.0f, 0.5f));*/
-			// Add a dynamic rigid body to ball
-			//volume->AddCollider(collider);
-		}
+		//{
+		//	TriggerVolume::Sptr volume = trigger->Add<TriggerVolume>();
+		//	BoxCollider::Sptr collider = BoxCollider::Create(glm::vec3(3.0f, 3.0f, 1.0f));
+		//	collider->SetPosition(glm::vec3(0.0f, 0.0f, 0.5f));
+		//	//Add a dynamic rigid body to ball
+		//	volume->AddCollider(collider);
+		//}
 
 		// Save the asset manifest for all the resources we just loaded
 		ResourceManager::SaveManifest("manifest.json");
@@ -515,6 +523,7 @@ int main() {
 	//block stuff 
 	MeshResource::Sptr blockMesh = ResourceManager::CreateAsset<MeshResource>("Brick.obj");
 	Texture2D::Sptr blockTex = ResourceManager::CreateAsset<Texture2D>("textures/Brick1.png");
+	Texture2D::Sptr blockTex2 = ResourceManager::CreateAsset<Texture2D>("textures/Brick2.png");
 	//create material 
 	Material::Sptr blockMaterial = ResourceManager::CreateAsset<Material>();
 	{
@@ -523,7 +532,25 @@ int main() {
 		blockMaterial->Texture = blockTex;
 		blockMaterial->Shininess = 1.0f;
 	}
+	//create material2 
+	Material::Sptr blockMaterial2 = ResourceManager::CreateAsset<Material>();
+	{
+		blockMaterial2->Name = "Block2";
+		blockMaterial2->MatShader = scene->BaseShader;
+		blockMaterial2->Texture = blockTex2;
+		blockMaterial2->Shininess = 1.0f;
+	}
+	Texture2D::Sptr ballTex = ResourceManager::CreateAsset<Texture2D>("textures/Player.png");
+	Material::Sptr ballMaterial = ResourceManager::CreateAsset<Material>();
+	{
+		ballMaterial->Name = "Ball";
+		ballMaterial->MatShader = scene->BaseShader;
+		ballMaterial->Texture = ballTex;
+		ballMaterial->Shininess = 1.0f;
+
+	}
 	GameObject::Sptr playerM = scene->FindObjectByName("Player");
+	GameObject::Sptr ballM = scene->FindObjectByName("Ball");
 
 	///// Game loop /////
 	while (!glfwWindowShouldClose(window)) {
@@ -559,6 +586,28 @@ int main() {
 					//triggerInteraction->ExitMaterial = monkeyMaterial;
 					//number of objects 
 					
+				}
+			}
+			ImGui::Separator();
+			if (ImGui::Button("Add brick2"))
+			{
+				count += 1;
+				GameObject::Sptr blockM = scene->CreateGameObject("Block" + std::to_string(count));
+				{
+					blockM->SetPostion(glm::vec3(-1.5f, 0.0f, 1.0f));
+					blockM->SetRotation(glm::vec3(45.0f, 0.0f, 180.0f));
+					blockM->SetScale(glm::vec3(0.3f, 0.3f, 0.3f));
+					// Add a render component
+					RenderComponent::Sptr renderer = blockM->Add<RenderComponent>();
+					renderer->SetMesh(blockMesh);
+					renderer->SetMaterial(blockMaterial2);
+					// Add a dynamic rigid body to this block
+					RigidBody::Sptr physics = blockM->Add<RigidBody>(RigidBodyType::Kinematic);
+					physics->AddCollider(ConvexMeshCollider::Create());
+					// We'll add a behaviour that will interact with our trigger volumes
+					MaterialSwapBehaviour::Sptr triggerInteraction = blockM->Add<MaterialSwapBehaviour>();
+					triggerInteraction->EnterMaterial = ballMaterial;
+					triggerInteraction->ExitMaterial = blockMaterial;
 				}
 			}
 			ImGui::Separator();
@@ -645,6 +694,9 @@ int main() {
 		keyboard();
 		playerM->SetPostion(glm::vec3(movX, 5.0f, 1.0f));
 		
+		//check for collisions?
+
+
 		// Perform updates for all components
 		scene->Update(dt);
 
@@ -657,6 +709,8 @@ int main() {
 
 		// Update our worlds physics!
 		scene->DoPhysics(dt);
+
+		playerM->SetPostion(glm::vec3(movX, 5.0f, 1.0f));
 
 		// Draw object GUIs
 		if (isDebugWindowOpen) {

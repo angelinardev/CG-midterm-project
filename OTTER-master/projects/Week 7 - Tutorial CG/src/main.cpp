@@ -439,13 +439,13 @@ int main() {
 			renderer->SetMesh(playerMesh);
 			renderer->SetMaterial(playerMaterial);
 			// Add a dynamic rigid body to this monkey
-			RigidBody::Sptr physics = playerM->Add<RigidBody>(RigidBodyType::Kinematic);
+			//RigidBody::Sptr physics = playerM->Add<RigidBody>(RigidBodyType::Kinematic);
 			BoxCollider::Sptr box = BoxCollider::Create();
 			box->SetPosition(playerM->GetPosition());
 			box->SetScale(glm::vec3(1.0f, 0.5f, 1.0f));
 			//physics->AddCollider(box);
-			physics->AddCollider(BoxCollider::Create());
-			physics->SetMass(0.0f);
+			//physics->AddCollider(BoxCollider::Create());
+			//physics->SetMass(0.0f);
 
 
 		}
@@ -460,17 +460,14 @@ int main() {
 			renderer->SetMaterial(ballMaterial);
 			// Add a dynamic rigid body to this monkey
 			RigidBody::Sptr physics = ballM->Add<RigidBody>(RigidBodyType::Dynamic);
-			SphereCollider::Sptr sphere = SphereCollider::Create();
-			sphere->SetPosition(ballM->GetPosition());
 			//sphere->SetRadius(0.6f);
 			//physics->AddCollider(sphere);
-			physics->AddCollider(SphereCollider::Create());
+			
 			
 			// We'll add a behaviour that will interact with our trigger volumes
-			//MaterialSwapBehaviour::Sptr triggerInteraction = ballM->Add<MaterialSwapBehaviour>();
-			//triggerInteraction->EnterMaterial = boxMaterial;
-			//triggerInteraction->ExitMaterial = monkeyMaterial;
-			//TriggerVolume::Sptr triggerInteration = ballM->Add<TriggerVolume>();
+			//JumpBehaviour::Sptr triggerInteraction = ballM->Add<JumpBehaviour>();
+			//triggerInteraction->Awake();
+		//	TriggerVolume::Sptr triggerInteration = ballM->Add<TriggerVolume>();
 			//triggerInteration->AddCollider(sphere);
 			
 			//triggerInteration->
@@ -479,18 +476,27 @@ int main() {
 
 		// Kinematic rigid bodies are those controlled by some outside controller
 		// and ONLY collide with dynamic objects
-		//RigidBody::Sptr physics = monkey2->Add<RigidBody>(RigidBodyType::Kinematic);
-		//physics->AddCollider(ConvexMeshCollider::Create());
+		RigidBody::Sptr physics = playerM->Add<RigidBody>(RigidBodyType::Kinematic);
+		physics->AddCollider(ConvexMeshCollider::Create());
 
 		// Create a trigger volume for testing how we can detect collisions with objects!
-		//GameObject::Sptr trigger = scene->CreateGameObject("Trigger"); 
-		//{
-		//	TriggerVolume::Sptr volume = trigger->Add<TriggerVolume>();
-		//	BoxCollider::Sptr collider = BoxCollider::Create(glm::vec3(3.0f, 3.0f, 1.0f));
-		//	collider->SetPosition(glm::vec3(0.0f, 0.0f, 0.5f));
-		//	//Add a dynamic rigid body to ball
-		//	volume->AddCollider(collider);
-		//}
+		GameObject::Sptr trigger = scene->CreateGameObject("Trigger"); 
+		{
+			TriggerVolume::Sptr volume = trigger->Add<TriggerVolume>();
+			SphereCollider::Sptr collider = SphereCollider::Create();
+			collider->SetPosition(ballM->GetPosition());
+			//Add a dynamic rigid body to ball
+			volume->AddCollider(collider);
+		}
+
+		GameObject::Sptr trigger2 = scene->CreateGameObject("Trigger");
+		{
+			TriggerVolume::Sptr volume = trigger2->Add<TriggerVolume>();
+			BoxCollider::Sptr collider = BoxCollider::Create();
+			collider->SetPosition(playerM->GetPosition());
+			//Add a dynamic rigid body to ball
+			volume->AddCollider(collider);
+		}
 
 		// Save the asset manifest for all the resources we just loaded
 		ResourceManager::SaveManifest("manifest.json");
@@ -578,12 +584,12 @@ int main() {
 					renderer->SetMesh(blockMesh);
 					renderer->SetMaterial(blockMaterial);
 					// Add a dynamic rigid body to this block
-					RigidBody::Sptr physics = blockM->Add<RigidBody>(RigidBodyType::Kinematic);
+					RigidBody::Sptr physics = blockM->Add<RigidBody>(RigidBodyType::Static);
 					physics->AddCollider(ConvexMeshCollider::Create());
 					// We'll add a behaviour that will interact with our trigger volumes
 					MaterialSwapBehaviour::Sptr triggerInteraction = blockM->Add<MaterialSwapBehaviour>();
-					//triggerInteraction->EnterMaterial = boxMaterial;
-					//triggerInteraction->ExitMaterial = monkeyMaterial;
+					triggerInteraction->EnterMaterial = ballMaterial;
+					triggerInteraction->ExitMaterial = blockMaterial;
 					//number of objects 
 					
 				}
@@ -607,7 +613,7 @@ int main() {
 					// We'll add a behaviour that will interact with our trigger volumes
 					MaterialSwapBehaviour::Sptr triggerInteraction = blockM->Add<MaterialSwapBehaviour>();
 					triggerInteraction->EnterMaterial = ballMaterial;
-					triggerInteraction->ExitMaterial = blockMaterial;
+					triggerInteraction->ExitMaterial = blockMaterial2;
 				}
 			}
 			ImGui::Separator();

@@ -48,7 +48,7 @@ namespace Gameplay::Physics {
 		const int numObjects=collisionPairs.size();
 		thisFrameCollision.reserve(numObjects);
 
-		std::cout << numObjects << std::endl;
+		//std::cout << numObjects << std::endl;
 
 		// Will store our contact manifolds, can be static to be shared between frames and instances
 		static btManifoldArray	m_manifoldArray;
@@ -60,11 +60,24 @@ namespace Gameplay::Physics {
 
 			// Get the btCollisionObject that we're colliding with
 			btCollisionObject *obj = _ghost->getOverlappingObject(i);
-
+			// Get the collision object as a btRigidBody
+			const btRigidBody* body = (const btRigidBody*)obj;
+			// Extract the weak pointer that we stored in all our rigidbody user pointers
+			std::weak_ptr<IComponent> rawPtr = *reinterpret_cast<std::weak_ptr<IComponent>*>(body->getUserPointer());
+			// Cast lock the raw pointer and cast up to a RigidBody
+			std::shared_ptr<RigidBody> physicsPtr = std::dynamic_pointer_cast<RigidBody>(rawPtr.lock());
+			if (_scene->FindObjectByName("Player")->Get<RigidBody>() == physicsPtr && (GetGameObject()->Get<RigidBody>() == _scene->FindObjectByName("Ball")->Get<RigidBody>()))
+			{
+				std::cout << "\nCOLLISION HAS HAPPENED\n";
+				physicsPtr->GetGameObject()->OnEnteredTrigger(std::dynamic_pointer_cast<TriggerVolume>(SelfRef().lock()));
+				GetGameObject()->OnTriggerVolumeEntered(GetGameObject()->Get<RigidBody>());
+			}
+			
 			// Get the contact pair and resolve contact manifolds
 			btBroadphasePair* pair = &collisionPairs[i];
 			if (pair != nullptr && pair->m_algorithm != nullptr) {
 				pair->m_algorithm->getAllContactManifolds(m_manifoldArray);
+
 			} else {
 				continue;
 			}
@@ -78,7 +91,7 @@ namespace Gameplay::Physics {
 					break;
 				}
 			}
-
+			//std::cout << "Collision state is: " << hasCollision << std::endl;
 			// If we have contacts and the object's group matches our mask (since this isn't filtered for us)
 			if (hasCollision /*&& (obj->getBroadphaseHandle()->m_collisionFilterGroup & _collisionMask)*/) {
 				// Make sure the internal type is a bullet rigid body (no trigger-trigger interactions)

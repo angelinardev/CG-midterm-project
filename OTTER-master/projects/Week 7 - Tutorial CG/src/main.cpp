@@ -50,6 +50,7 @@
 #include "Gameplay/Components/JumpBehaviour.h"
 #include "Gameplay/Components/RenderComponent.h"
 #include "Gameplay/Components/MaterialSwapBehaviour.h"
+#include "Gameplay/Components/TriggerVolumeEnterBehaviour.h"
 
 // Physics
 #include "Gameplay/Physics/RigidBody.h"
@@ -272,6 +273,7 @@ int main() {
 	ComponentManager::RegisterType<RotatingBehaviour>();
 	ComponentManager::RegisterType<JumpBehaviour>();
 	ComponentManager::RegisterType<MaterialSwapBehaviour>();
+	ComponentManager::RegisterType<TriggerVolumeEnterBehaviour>();
 
 	// GL states, we'll enable depth testing and backface fulling
 	glEnable(GL_DEPTH_TEST);
@@ -449,10 +451,10 @@ int main() {
 			//physics->AddCollider(BoxCollider::Create());
 			physics->SetMass(0.0f);
 		}
-		TriggerVolume::Sptr volume = playerM->Add<TriggerVolume>();
+		//TriggerVolume::Sptr volume = playerM->Add<TriggerVolume>();
 		GameObject::Sptr ballM = scene->CreateGameObject("Ball");
 		{
-			ballM->SetPostion(glm::vec3(-1.0f, 0.0f, 2.0f));
+			ballM->SetPostion(glm::vec3(-1.0f, 0.1f, 2.0f));
 			ballM->SetRotation(glm::vec3(0.0f, 0.0f, 180.0f));
 			ballM->SetScale(glm::vec3(0.6f, 0.6f, 0.6f));
 			// Add a render component
@@ -470,12 +472,12 @@ int main() {
 
 		}
 		TriggerVolume::Sptr volume2 = ballM->Add<TriggerVolume>();
-		volume2->OnEnteredTrigger(volume);
-		volume->OnEnteredTrigger(volume2);
-		volume->OnLeavingTrigger(volume2);
-		volume2->OnLeavingTrigger(volume);
-		volume2->OnTriggerVolumeEntered(playerM->Get<RigidBody>());
-		volume->OnTriggerVolumeEntered(ballM->Get<RigidBody>());
+		// This is an example of attaching a component and setting some parameters
+		TriggerVolumeEnterBehaviour::Sptr behaviour = ballM->Add<TriggerVolumeEnterBehaviour>();
+		
+		//volume2->OnEnteredTrigger(volume);
+		//volume2->OnLeavingTrigger(volume);
+		//volume2->OnTriggerVolumeEntered(playerM->Get<RigidBody>());
 		
 		// Kinematic rigid bodies are those controlled by some outside controller
 		// and ONLY collide with dynamic objects
@@ -699,7 +701,7 @@ int main() {
 
 		//move player
 		keyboard();
-		//playerM->SetPostion(glm::vec3(movX, 5.0f, 1.0f));
+		playerM->SetPostion(glm::vec3(movX, 0.0f, -5.0f));
 		
 		//check for collisions?
 

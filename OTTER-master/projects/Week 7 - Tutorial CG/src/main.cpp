@@ -234,6 +234,8 @@ void keyboard() {
 //	return blockM;
 //
 //}
+
+const glm::vec3 wForce = glm::vec3(0.0f, 5.0f, 0.0f);
 int main() {
 	Logger::Init(); // We'll borrow the logger from the toolkit, but we need to initialize it
 
@@ -280,9 +282,9 @@ int main() {
 	bool loadScene = false;
 	// For now we can use a toggle to generate our scene vs load from file
 	if (loadScene) {
-		ResourceManager::LoadManifest("scene-manifest.json");
+		ResourceManager::LoadManifest("scene1-manifest.json");
 		
-		scene = Scene::Load("scene.json");
+		scene = Scene::Load("scene1.json");
 		
 	}
 	else {
@@ -431,24 +433,23 @@ int main() {
 
 		GameObject::Sptr playerM = scene->CreateGameObject("Player");
 		{
-			playerM->SetPostion(glm::vec3(-1.5f, -5.0f, 1.0f));
-			playerM->SetRotation(glm::vec3(0.0f, 0.0f, 180.0f));
+			playerM->SetPostion(glm::vec3(-1.5f, 0.0f, 1.0f));
+			playerM->SetRotation(glm::vec3(135.0f, 0.0f, 180.0f));
 			playerM->SetScale(glm::vec3(0.4f, 0.4f, 0.4f));
 			// Add a render component
 			RenderComponent::Sptr renderer = playerM->Add<RenderComponent>();
 			renderer->SetMesh(playerMesh);
 			renderer->SetMaterial(playerMaterial);
 			// Add a dynamic rigid body to this monkey
-			//RigidBody::Sptr physics = playerM->Add<RigidBody>(RigidBodyType::Kinematic);
-			BoxCollider::Sptr box = BoxCollider::Create();
-			box->SetPosition(playerM->GetPosition());
-			box->SetScale(glm::vec3(1.0f, 0.5f, 1.0f));
-			//physics->AddCollider(box);
+			RigidBody::Sptr physics = playerM->Add<RigidBody>(RigidBodyType::Dynamic);
+			BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(6.7f, 1.14f, 0.179f));
+			//box->SetPosition(playerM->GetPosition());
+			box->SetScale(glm::vec3(0.2f, 0.2f, 0.2f));
+			physics->AddCollider(box);
 			//physics->AddCollider(BoxCollider::Create());
-			//physics->SetMass(0.0f);
-
-
+			physics->SetMass(0.0f);
 		}
+		TriggerVolume::Sptr volume = playerM->Add<TriggerVolume>();
 		GameObject::Sptr ballM = scene->CreateGameObject("Ball");
 		{
 			ballM->SetPostion(glm::vec3(-1.5f, 0.0f, 1.0f));
@@ -460,43 +461,43 @@ int main() {
 			renderer->SetMaterial(ballMaterial);
 			// Add a dynamic rigid body to this monkey
 			RigidBody::Sptr physics = ballM->Add<RigidBody>(RigidBodyType::Dynamic);
-			//sphere->SetRadius(0.6f);
-			//physics->AddCollider(sphere);
-			
-			
-			// We'll add a behaviour that will interact with our trigger volumes
-			//JumpBehaviour::Sptr triggerInteraction = ballM->Add<JumpBehaviour>();
-			//triggerInteraction->Awake();
-		//	TriggerVolume::Sptr triggerInteration = ballM->Add<TriggerVolume>();
-			//triggerInteration->AddCollider(sphere);
-			
-			//triggerInteration->
+			SphereCollider::Sptr sphere = SphereCollider::Create(0.413f);
+			//sphere->SetPosition(ballM->GetPosition());
+			sphere->SetScale(glm::vec3(0.6f, 0.6f, 0.6f));
+			physics->AddCollider(sphere);
+			//physics->ApplyImpulse(wForce);
+			//physics->ApplyForce(wForce);
+
 		}
-
-
+		TriggerVolume::Sptr volume2 = ballM->Add<TriggerVolume>();
+		volume2->OnEnteredTrigger(volume);
+		volume->OnEnteredTrigger(volume2);
+		volume->OnLeavingTrigger(volume2);
+		volume2->OnLeavingTrigger(volume);
+		volume2->OnTriggerVolumeEntered(playerM->Get<RigidBody>());
+		volume->OnTriggerVolumeEntered(ballM->Get<RigidBody>());
+		
 		// Kinematic rigid bodies are those controlled by some outside controller
 		// and ONLY collide with dynamic objects
-		RigidBody::Sptr physics = playerM->Add<RigidBody>(RigidBodyType::Kinematic);
-		physics->AddCollider(ConvexMeshCollider::Create());
-
 		// Create a trigger volume for testing how we can detect collisions with objects!
-		GameObject::Sptr trigger = scene->CreateGameObject("Trigger"); 
-		{
-			TriggerVolume::Sptr volume = trigger->Add<TriggerVolume>();
-			SphereCollider::Sptr collider = SphereCollider::Create();
-			collider->SetPosition(ballM->GetPosition());
-			//Add a dynamic rigid body to ball
-			volume->AddCollider(collider);
-		}
 
-		GameObject::Sptr trigger2 = scene->CreateGameObject("Trigger");
-		{
-			TriggerVolume::Sptr volume = trigger2->Add<TriggerVolume>();
-			BoxCollider::Sptr collider = BoxCollider::Create();
-			collider->SetPosition(playerM->GetPosition());
-			//Add a dynamic rigid body to ball
-			volume->AddCollider(collider);
-		}
+		//GameObject::Sptr trigger = scene->CreateGameObject("Trigger"); 
+		//{
+		//	TriggerVolume::Sptr volume = trigger->Add<TriggerVolume>();
+		//	SphereCollider::Sptr collider = SphereCollider::Create();
+		//	collider->SetPosition(ballM->GetPosition());
+		//	//Add a dynamic rigid body to ball
+		//	volume->AddCollider(collider);
+		//}
+
+		//GameObject::Sptr trigger2 = scene->CreateGameObject("Trigger");
+		//{
+		//	TriggerVolume::Sptr volume = trigger2->Add<TriggerVolume>();
+		//	BoxCollider::Sptr collider = BoxCollider::Create();
+		//	collider->SetPosition(playerM->GetPosition());
+		//	//Add a dynamic rigid body to ball
+		//	volume->AddCollider(collider);
+		//}
 
 		// Save the asset manifest for all the resources we just loaded
 		ResourceManager::SaveManifest("manifest.json");
@@ -698,7 +699,7 @@ int main() {
 
 		//move player
 		keyboard();
-		playerM->SetPostion(glm::vec3(movX, 5.0f, 1.0f));
+		//playerM->SetPostion(glm::vec3(movX, 5.0f, 1.0f));
 		
 		//check for collisions?
 
@@ -716,7 +717,6 @@ int main() {
 		// Update our worlds physics!
 		scene->DoPhysics(dt);
 
-		playerM->SetPostion(glm::vec3(movX, 5.0f, 1.0f));
 
 		// Draw object GUIs
 		if (isDebugWindowOpen) {

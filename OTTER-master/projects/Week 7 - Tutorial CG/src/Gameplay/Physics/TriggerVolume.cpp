@@ -48,6 +48,8 @@ namespace Gameplay::Physics {
 		const int numObjects=collisionPairs.size();
 		thisFrameCollision.reserve(numObjects);
 
+		std::cout << numObjects << std::endl;
+
 		// Will store our contact manifolds, can be static to be shared between frames and instances
 		static btManifoldArray	m_manifoldArray;
 
@@ -78,7 +80,7 @@ namespace Gameplay::Physics {
 			}
 
 			// If we have contacts and the object's group matches our mask (since this isn't filtered for us)
-			if (hasCollision && (obj->getBroadphaseHandle()->m_collisionFilterGroup & _collisionMask)) {
+			if (hasCollision /*&& (obj->getBroadphaseHandle()->m_collisionFilterGroup & _collisionMask)*/) {
 				// Make sure the internal type is a bullet rigid body (no trigger-trigger interactions)
 				if (obj->getInternalType() == btCollisionObject::CO_RIGID_BODY) {
 					// Get the collision object as a btRigidBody
@@ -106,6 +108,8 @@ namespace Gameplay::Physics {
 
 							// If the object is NOT in the cache, we invoke all the callbacks
 							if (it == _currentCollisions.end()) {
+
+								std::cout << "\nCOLLISION HAS HAPPENED\n";
 								physicsPtr->GetGameObject()->OnEnteredTrigger(std::dynamic_pointer_cast<TriggerVolume>(SelfRef().lock()));
 								GetGameObject()->OnTriggerVolumeEntered(physicsPtr);
 							}
@@ -125,6 +129,8 @@ namespace Gameplay::Physics {
 
 			// If the item no longer exists in the list, we need to invoke exit callbacks
 			if (it == thisFrameCollision.end()) {
+
+				std::cout << "\nCOLLISION HAS ENDED\n";
 				weakPtr.lock()->GetGameObject()->OnLeavingTrigger(std::dynamic_pointer_cast<TriggerVolume>(SelfRef().lock()));
 				GetGameObject()->OnTriggerVolumeLeaving(weakPtr.lock());
 			}
@@ -185,6 +191,11 @@ namespace Gameplay::Physics {
 		TriggerVolume::Sptr result = std::make_shared<TriggerVolume>();
 		result->FromJsonBase(data);
 		return result;
+	}
+
+	void TriggerVolume::OnEnteredTrigger(const std::shared_ptr<Physics::TriggerVolume>& trigger)
+	{
+
 	}
 
 	btBroadphaseProxy* TriggerVolume::_GetBroadphaseHandle() {

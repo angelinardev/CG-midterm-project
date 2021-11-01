@@ -452,7 +452,7 @@ int main() {
 		TriggerVolume::Sptr volume = playerM->Add<TriggerVolume>();
 		GameObject::Sptr ballM = scene->CreateGameObject("Ball");
 		{
-			ballM->SetPostion(glm::vec3(-1.5f, 0.0f, 1.0f));
+			ballM->SetPostion(glm::vec3(-1.0f, 0.0f, 2.0f));
 			ballM->SetRotation(glm::vec3(0.0f, 0.0f, 180.0f));
 			ballM->SetScale(glm::vec3(0.6f, 0.6f, 0.6f));
 			// Add a render component

@@ -769,6 +769,8 @@ int main() {
 			ImGui::Separator();
 		}
 		ballM->SetPostion(glm::vec3(ballM->GetPosition().x, 0.0f, ballM->GetPosition().z));
+	//	glm::vec3 test = playerM->Get<RigidBody>()->GetLinearVelocity();
+		//ballM->Get<RigidBody>()->SetLinearVelocity(test);
 		dt *= playbackSpeed;
 
 		//move player

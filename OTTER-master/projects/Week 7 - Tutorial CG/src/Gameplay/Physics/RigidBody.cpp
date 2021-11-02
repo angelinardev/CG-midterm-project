@@ -112,6 +112,14 @@ namespace Gameplay::Physics {
 		}
 	}
 
+	void RigidBody::SetLinearVelocity(const glm::vec3 &value) {
+		_body->setLinearVelocity(ToBt(value));
+	}
+
+	glm::vec3 RigidBody::GetLinearVelocity() const {
+		return ToGlm(_body ->getLinearVelocity());
+	}
+
 	RigidBodyType RigidBody::GetType() const {
 		return _type;
 	}

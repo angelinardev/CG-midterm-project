@@ -130,12 +130,17 @@ namespace Gameplay::Physics {
 		/// <param name="dt">The time in seconds since the last frame</param>
 		virtual void PhysicsPostStep(float dt) override;
 
+		glm::vec3 GetLinearVelocity() const;
+
+		void SetLinearVelocity(const glm::vec3 &value);
+
 		// Inherited from IComponent
 		virtual void Awake() override;
 		virtual void RenderImGui() override;
 		virtual nlohmann::json ToJson() const override;
 		static RigidBody::Sptr FromJson(const nlohmann::json& data);
 		MAKE_TYPENAME(RigidBody)
+
 
 
 	protected:

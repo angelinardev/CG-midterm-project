@@ -66,11 +66,18 @@ namespace Gameplay::Physics {
 			std::weak_ptr<IComponent> rawPtr = *reinterpret_cast<std::weak_ptr<IComponent>*>(body->getUserPointer());
 			// Cast lock the raw pointer and cast up to a RigidBody
 			std::shared_ptr<RigidBody> physicsPtr = std::dynamic_pointer_cast<RigidBody>(rawPtr.lock());
+			// Add the object to the known collisions for this frame
+			thisFrameCollision.push_back(physicsPtr);
+
+			// Check to see if the object has been added to our object cache
+			auto& it = std::find_if(_currentCollisions.begin(), _currentCollisions.end(), [&](const std::weak_ptr<RigidBody>& item) {
+				return item.lock() == physicsPtr;
+				});
 			if (_scene->FindObjectByName("Player")->Get<RigidBody>() == physicsPtr && (GetGameObject()->Get<RigidBody>() == _scene->FindObjectByName("Ball")->Get<RigidBody>()))
 			{
 				std::cout << "\nCOLLISION HAS HAPPENED\n";
 				physicsPtr->GetGameObject()->OnEnteredTrigger(std::dynamic_pointer_cast<TriggerVolume>(SelfRef().lock()));
-				GetGameObject()->OnTriggerVolumeEntered(GetGameObject()->Get<RigidBody>());
+				GetGameObject()->OnTriggerVolumeEntered(physicsPtr);
 			}
 			
 			// Get the contact pair and resolve contact manifolds
@@ -145,7 +152,9 @@ namespace Gameplay::Physics {
 
 				std::cout << "\nCOLLISION HAS ENDED\n";
 				weakPtr.lock()->GetGameObject()->OnLeavingTrigger(std::dynamic_pointer_cast<TriggerVolume>(SelfRef().lock()));
+				//GetGameObject()->OnTriggerVolumeLeaving(weakPtr.lock());
 				GetGameObject()->OnTriggerVolumeLeaving(weakPtr.lock());
+				
 			}
 		}
 

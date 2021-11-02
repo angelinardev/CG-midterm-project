@@ -3,6 +3,9 @@
 #include "Gameplay/Physics/TriggerVolume.h"
 #include "Gameplay/Components/RenderComponent.h"
 #include "Gameplay/Physics/TriggerVolume.h"
+#include "Gameplay/Physics/PhysicsBase.h"
+#include "Gameplay/Physics/RigidBody.h"
+
 
 /// <summary>
 /// Provides an example behaviour that uses some of the trigger interface to change the material

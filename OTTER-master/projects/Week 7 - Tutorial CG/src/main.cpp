@@ -454,8 +454,9 @@ int main() {
 			// Add a dynamic rigid body to this monkey
 			RigidBody::Sptr physics = playerM->Add<RigidBody>(RigidBodyType::Dynamic);
 			BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(6.7f, 1.14f, 0.179f));
+			//BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(6.7f, 0.179f, 1.14f));
 			//box->SetPosition(playerM->GetPosition());
-			box->SetScale(glm::vec3(0.2f, 0.2f, 0.2f));
+			box->SetScale(glm::vec3(0.2f, 2.5f, 1.0f));
 			physics->AddCollider(box);
 			//physics->AddCollider(BoxCollider::Create());
 			physics->SetMass(0.0f);
@@ -474,7 +475,7 @@ int main() {
 			RigidBody::Sptr physics = ballM->Add<RigidBody>(RigidBodyType::Dynamic);
 			SphereCollider::Sptr sphere = SphereCollider::Create(0.413f);
 			//sphere->SetPosition(ballM->GetPosition());
-			sphere->SetScale(glm::vec3(0.6f, 0.6f, 0.6f));
+			sphere->SetScale(glm::vec3(0.6f, 2.0f, 0.6f));
 			physics->AddCollider(sphere);
 			//physics->ApplyImpulse(wForce);
 			//physics->ApplyForce(wForce);
@@ -489,9 +490,12 @@ int main() {
 			renderer->SetMesh(wallMesh);
 			renderer->SetMaterial(wallMaterial);
 
-			RigidBody::Sptr physics = WallM->Add<RigidBody>(RigidBodyType::Dynamic);
-			BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(76.7f,0.166f,188.f));
-			box->SetScale(glm::vec3(0.210f,2.64f,5.0f));
+			RigidBody::Sptr physics = WallM->Add<RigidBody>(RigidBodyType::Static);
+			BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(189.f, 80.f, 0.166f));
+			//BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(189.f, 0.166f, 80.f));
+			box->SetScale(glm::vec3(0.210f, 2.64f, 5.0f));
+			box->SetPosition(glm::vec3(0.0f, 0.0f, -0.5f));
+			//box->SetPosition(WallM1->GetPosition());
 			physics->AddCollider(box);
 			physics->SetMass(0.0f);
 			
@@ -505,9 +509,12 @@ int main() {
 			renderer->SetMesh(wallMesh);
 			renderer->SetMaterial(wallMaterial);
 
-			RigidBody::Sptr physics = WallM1->Add<RigidBody>(RigidBodyType::Dynamic);
-			BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(76.7f, 0.166f, 188.f));
+			RigidBody::Sptr physics = WallM1->Add<RigidBody>(RigidBodyType::Static);
+			BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(189.f, 80.f, 0.166f));
+			//BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(189.f, 0.166f, 80.f));
 			box->SetScale(glm::vec3(0.210f, 2.64f, 5.0f));
+			box->SetPosition(glm::vec3(0.0f, 0.0f, 1.5f));
+			//box->SetPosition(WallM1->GetPosition());
 			physics->AddCollider(box);
 			physics->SetMass(0.0f);
 
@@ -521,8 +528,11 @@ int main() {
 			renderer->SetMaterial(wallMaterial);
 
 			RigidBody::Sptr physics = WallM2->Add<RigidBody>(RigidBodyType::Dynamic);
-			BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(76.7f, 0.166f, 188.f));
+			BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(189.f, 80.f, 0.166f));
+			//BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(189.f, 0.166f, 80.f));
 			box->SetScale(glm::vec3(0.210f, 2.64f, 5.0f));
+			box->SetPosition(glm::vec3(0.0, 0.0f, 1.0f));
+			//box->SetPosition(WallM1->GetPosition());
 			physics->AddCollider(box);
 			physics->SetMass(0.0f);
 
@@ -758,7 +768,7 @@ int main() {
 			// Split lights from the objects in ImGui
 			ImGui::Separator();
 		}
-		ballM->SetPostion(glm::vec3(ballM->GetPosition().x, playerM->GetPosition().y, ballM->GetPosition().z));
+		ballM->SetPostion(glm::vec3(ballM->GetPosition().x, 0.0f, ballM->GetPosition().z));
 		dt *= playbackSpeed;
 
 		//move player

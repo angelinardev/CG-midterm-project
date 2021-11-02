@@ -12,7 +12,7 @@ void TriggerVolumeEnterBehaviour::OnTriggerVolumeEntered(const std::shared_ptr<G
 {
 	LOG_INFO("Body has entered our trigger volume: {}", body->GetGameObject()->Name);
 	_playerInTrigger = true;
-	const glm::vec3 wForce = glm::vec3(0.0f, 0.0f, 10.0f);
+	const glm::vec3 wForce = glm::vec3(0.0f, 0.0f, 0.8f);
 	body->ApplyImpulse(wForce);
 }
 

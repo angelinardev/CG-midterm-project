@@ -236,7 +236,7 @@ void keyboard() {
 //
 //}
 
-const glm::vec3 wForce = glm::vec3(0.0f, 5.0f, 0.0f);
+const glm::vec3 wForce = glm::vec3(0.0f, 0.2f, 0.0f);
 int main() {
 	Logger::Init(); // We'll borrow the logger from the toolkit, but we need to initialize it
 
@@ -696,7 +696,7 @@ int main() {
 			// Split lights from the objects in ImGui
 			ImGui::Separator();
 		}
-
+		ballM->SetPostion(glm::vec3(ballM->GetPosition().x, playerM->GetPosition().y, ballM->GetPosition().z));
 		dt *= playbackSpeed;
 
 		//move player

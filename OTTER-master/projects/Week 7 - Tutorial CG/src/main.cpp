@@ -1,5 +1,6 @@
 #include <Logging.h>
 #include <iostream>
+#include <fstream>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -51,6 +52,7 @@
 #include "Gameplay/Components/RenderComponent.h"
 #include "Gameplay/Components/MaterialSwapBehaviour.h"
 #include "Gameplay/Components/TriggerVolumeEnterBehaviour.h"
+#include "Gameplay/Components/DeleteObjectBehaviour.h"
 
 // Physics
 #include "Gameplay/Physics/RigidBody.h"
@@ -171,6 +173,12 @@ bool DrawSaveLoadImGui(Scene::Sptr& scene, std::string& path) {
 		scene->Save(path);
 		std::string newFilename = std::filesystem::path(path).stem().string() + "-manifest.json";
 		ResourceManager::SaveManifest(newFilename);
+		//save brick count
+		std::ofstream myFile;
+		myFile.open("bricks.txt");
+		myFile << scene->brick_count <<"\n";
+		myFile.close();
+
 	}
 	ImGui::SameLine();
 	// Load scene from file button
@@ -180,6 +188,20 @@ bool DrawSaveLoadImGui(Scene::Sptr& scene, std::string& path) {
 		std::string newFilename = std::filesystem::path(path).stem().string() + "-manifest.json";
 		ResourceManager::LoadManifest(newFilename);
 		scene = Scene::Load(path);
+		std::string line;
+		std::ifstream myFile("bricks.txt");
+		if (myFile.is_open())
+		{
+			while (std::getline(myFile, line))
+			{
+				scene->brick_count = std::stoi(line);
+			}
+			myFile.close();
+		}
+		else
+		{
+			scene->brick_count = 0;
+		}
 
 		return true;
 	}
@@ -274,6 +296,7 @@ int main() {
 	ComponentManager::RegisterType<JumpBehaviour>();
 	ComponentManager::RegisterType<MaterialSwapBehaviour>();
 	ComponentManager::RegisterType<TriggerVolumeEnterBehaviour>();
+	ComponentManager::RegisterType<DeleteObjectBehaviour>();
 
 	// GL states, we'll enable depth testing and backface fulling
 	glEnable(GL_DEPTH_TEST);
@@ -287,6 +310,20 @@ int main() {
 		ResourceManager::LoadManifest("scene1-manifest.json");
 		
 		scene = Scene::Load("scene1.json");
+		std::string line;
+		std::ifstream myFile("bricks.txt");
+		if (myFile.is_open())
+		{
+			while (std::getline(myFile, line))
+			{
+				scene->brick_count = std::stoi(line);
+			}
+			myFile.close();
+		}
+		else
+		{
+			scene->brick_count = 0;
+		}
 		
 	}
 	else {
@@ -577,6 +614,7 @@ int main() {
 		ResourceManager::SaveManifest("manifest.json");
 		// Save the scene to a JSON file
 		scene->Save("scene.json");
+		scene->brick_count = 0;
 	}
 
 	// Call scene awake to start up all of our components
@@ -659,13 +697,15 @@ int main() {
 					renderer->SetMesh(blockMesh);
 					renderer->SetMaterial(blockMaterial);
 					// Add a dynamic rigid body to this block
-					RigidBody::Sptr physics = blockM->Add<RigidBody>(RigidBodyType::Static);
-					physics->AddCollider(ConvexMeshCollider::Create());
+					RigidBody::Sptr physics = blockM->Add<RigidBody>(RigidBodyType::Dynamic);
+					BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(3.24f, 1.14f, 1.0f));
+					box->SetScale(glm::vec3(0.3f, 0.3f, 0.3f));
+					physics->AddCollider(box);
+					physics->SetMass(0.0f);
 					// We'll add a behaviour that will interact with our trigger volumes
-					MaterialSwapBehaviour::Sptr triggerInteraction = blockM->Add<MaterialSwapBehaviour>();
-					triggerInteraction->EnterMaterial = ballMaterial;
-					triggerInteraction->ExitMaterial = blockMaterial;
-					//number of objects 
+					TriggerVolume::Sptr volume = blockM->Add<TriggerVolume>();
+					// This is an example of attaching a component and setting some parameters
+					DeleteObjectBehaviour::Sptr behaviour = blockM->Add<DeleteObjectBehaviour>();
 					
 				}
 			}
@@ -683,12 +723,15 @@ int main() {
 					renderer->SetMesh(blockMesh);
 					renderer->SetMaterial(blockMaterial2);
 					// Add a dynamic rigid body to this block
-					RigidBody::Sptr physics = blockM->Add<RigidBody>(RigidBodyType::Kinematic);
-					physics->AddCollider(ConvexMeshCollider::Create());
+					RigidBody::Sptr physics = blockM->Add<RigidBody>(RigidBodyType::Dynamic);
+					BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(3.24f, 1.14f, 1.0f));
+					box->SetScale(glm::vec3(0.3f, 0.3f, 0.3f));
+					physics->AddCollider(box);
+					physics->SetMass(0.0f);
 					// We'll add a behaviour that will interact with our trigger volumes
-					MaterialSwapBehaviour::Sptr triggerInteraction = blockM->Add<MaterialSwapBehaviour>();
-					triggerInteraction->EnterMaterial = ballMaterial;
-					triggerInteraction->ExitMaterial = blockMaterial2;
+					TriggerVolume::Sptr volume = blockM->Add<TriggerVolume>();
+					// This is an example of attaching a component and setting some parameters
+					DeleteObjectBehaviour::Sptr behaviour = blockM->Add<DeleteObjectBehaviour>();
 				}
 			}
 			ImGui::Separator();
@@ -770,6 +813,8 @@ int main() {
 		}
 		ballM->SetPostion(glm::vec3(ballM->GetPosition().x, 0.0f, ballM->GetPosition().z));
 		dt *= playbackSpeed;
+
+		
 
 		//move player
 		keyboard();

@@ -66,8 +66,7 @@ namespace Gameplay::Physics {
 			std::weak_ptr<IComponent> rawPtr = *reinterpret_cast<std::weak_ptr<IComponent>*>(body->getUserPointer());
 			// Cast lock the raw pointer and cast up to a RigidBody
 			std::shared_ptr<RigidBody> physicsPtr = std::dynamic_pointer_cast<RigidBody>(rawPtr.lock());
-			// Add the object to the known collisions for this frame
-			thisFrameCollision.push_back(physicsPtr);
+			
 
 			// Check to see if the object has been added to our object cache
 			auto& it = std::find_if(_currentCollisions.begin(), _currentCollisions.end(), [&](const std::weak_ptr<RigidBody>& item) {
@@ -75,11 +74,24 @@ namespace Gameplay::Physics {
 				});
 			if (_scene->FindObjectByName("Player")->Get<RigidBody>() == physicsPtr && (GetGameObject()->Get<RigidBody>() == _scene->FindObjectByName("Ball")->Get<RigidBody>()))
 			{
+				// Add the object to the known collisions for this frame
+				thisFrameCollision.push_back(physicsPtr);
 				std::cout << "\nCOLLISION HAS HAPPENED\n";
 				physicsPtr->GetGameObject()->OnEnteredTrigger(std::dynamic_pointer_cast<TriggerVolume>(SelfRef().lock()));
 				GetGameObject()->OnTriggerVolumeEntered(physicsPtr);
 			}
-			
+			//go through the bricks, might need to adjust numbers
+			for (int i = 1; i <= _scene->brick_count; i++)
+			{
+				if (_scene->FindObjectByName("Ball")->Get<RigidBody>() == physicsPtr && (GetGameObject()->Get<RigidBody>() == _scene->FindObjectByName("Block"+ std::to_string(i))->Get<RigidBody>()))
+				{
+					// Add the object to the known collisions for this frame
+					thisFrameCollision.push_back(physicsPtr);
+					std::cout << "\nCOLLISION HAS HAPPENED\n";
+					physicsPtr->GetGameObject()->OnEnteredTrigger(std::dynamic_pointer_cast<TriggerVolume>(SelfRef().lock()));
+					GetGameObject()->OnTriggerVolumeEntered(physicsPtr);
+				}
+			}
 			// Get the contact pair and resolve contact manifolds
 			btBroadphasePair* pair = &collisionPairs[i];
 			if (pair != nullptr && pair->m_algorithm != nullptr) {

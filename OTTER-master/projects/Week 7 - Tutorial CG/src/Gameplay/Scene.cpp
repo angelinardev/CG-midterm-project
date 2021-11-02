@@ -112,7 +112,20 @@ namespace Gameplay {
 			for (auto& obj : Objects) {
 				obj->Update(dt);
 			}
+			//iterate over deletion queue
+			for (int i=0; i< _deletionQueue.size(); i++)
+			{
+				//delete from objects
+				remove(Objects.begin(), Objects.end(), _deletionQueue[i]);
+			}
+			//empty queue each frame
+			_deletionQueue.clear();
 		}
+	}
+
+	void Scene::DeleteGameObject(const std::shared_ptr<GameObject>& object)
+	{
+		_deletionQueue.push_back(object);
 	}
 
 	void Scene::SetShaderLight(int index, bool update /*= true*/) {

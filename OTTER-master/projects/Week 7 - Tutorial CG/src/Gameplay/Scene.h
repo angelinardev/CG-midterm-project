@@ -110,6 +110,9 @@ namespace Gameplay {
 		/// <param name="dt">The time in seconds since the last frame</param>
 		void Update(float dt);
 
+		//delete game object
+		void DeleteGameObject(const std::shared_ptr<GameObject>& object);
+
 		/// <summary>
 		/// Handles setting the shader uniforms for our light structure in our array of lights
 		/// </summary>
@@ -158,6 +161,8 @@ namespace Gameplay {
 		int NumObjects() const;
 		GameObject::Sptr GetObjectByIndex(int index) const;
 
+		int brick_count;
+
 	protected:
 		// Bullet physics stuff world
 		btDynamicsWorld*          _physicsWorld;
@@ -183,8 +188,11 @@ namespace Gameplay {
 		// Stores all the objects in our scene
 		std::vector<GameObject::Sptr>  Objects;
 		glm::vec3 _ambientLight;
+		std::vector<GameObject::Sptr> _deletionQueue;
 
 		bool                       _isAwake;
+
+	
 
 		/// <summary>
 		/// Handles configuring our bullet physics stuff

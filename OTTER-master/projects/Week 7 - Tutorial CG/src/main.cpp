@@ -302,6 +302,9 @@ int main() {
 		MeshResource::Sptr ballMesh = ResourceManager::CreateAsset<MeshResource>("ball.obj");
 		Texture2D::Sptr ballTex = ResourceManager::CreateAsset<Texture2D>("textures/Player.png");
 
+		MeshResource::Sptr wallMesh = ResourceManager::CreateAsset<MeshResource>("Wall.obj");
+		Texture2D::Sptr wallTex = ResourceManager::CreateAsset<Texture2D>("textures/Wall.png");
+
 		
 		// Create an empty scene
 		scene = std::make_shared<Scene>();
@@ -326,7 +329,13 @@ int main() {
 			ballMaterial->Shininess = 1.0f;
 
 		}
-
+		
+		Material::Sptr wallMaterial = ResourceManager::CreateAsset<Material>(); {
+			wallMaterial->Name = "Wall";
+			wallMaterial->MatShader = scene->BaseShader;
+			wallMaterial->Texture = wallTex;
+			wallMaterial->Shininess = 1.0f;
+		}
 
 		// Create some lights for our scene
 		scene->Lights.resize(3);
@@ -454,7 +463,7 @@ int main() {
 		//TriggerVolume::Sptr volume = playerM->Add<TriggerVolume>();
 		GameObject::Sptr ballM = scene->CreateGameObject("Ball");
 		{
-			ballM->SetPostion(glm::vec3(-1.0f, 0.1f, 2.0f));
+			ballM->SetPostion(glm::vec3(-1.0f, 0.0f, 2.0f));
 			ballM->SetRotation(glm::vec3(0.0f, 0.0f, 180.0f));
 			ballM->SetScale(glm::vec3(0.6f, 0.6f, 0.6f));
 			// Add a render component
@@ -471,9 +480,62 @@ int main() {
 			//physics->ApplyForce(wForce);
 
 		}
+
+		GameObject::Sptr WallM = scene->CreateGameObject("Wall1"); {
+			WallM->SetPostion(glm::vec3(5.410f, 0.370f, 2.0f));
+			WallM->SetRotation(glm::vec3(-113.f, -91.f, 113.f));
+			WallM->SetScale(glm::vec3(0.210f, 2.64f, 5.0f));
+			RenderComponent::Sptr renderer = WallM->Add<RenderComponent>();
+			renderer->SetMesh(wallMesh);
+			renderer->SetMaterial(wallMaterial);
+
+			RigidBody::Sptr physics = WallM->Add<RigidBody>(RigidBodyType::Dynamic);
+			BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(76.7f,0.166f,188.f));
+			box->SetScale(glm::vec3(0.210f,2.64f,5.0f));
+			physics->AddCollider(box);
+			physics->SetMass(0.0f);
+			
+		}
+
+		GameObject::Sptr WallM1 = scene->CreateGameObject("Wall2"); {
+			WallM1->SetPostion(glm::vec3(-4.410f, 0.370f, 2.0f));
+			WallM1->SetRotation(glm::vec3(-113.f, -91.f, 113.f));
+			WallM1->SetScale(glm::vec3(0.210f, 2.64f, 5.0f));
+			RenderComponent::Sptr renderer = WallM1->Add<RenderComponent>();
+			renderer->SetMesh(wallMesh);
+			renderer->SetMaterial(wallMaterial);
+
+			RigidBody::Sptr physics = WallM1->Add<RigidBody>(RigidBodyType::Dynamic);
+			BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(76.7f, 0.166f, 188.f));
+			box->SetScale(glm::vec3(0.210f, 2.64f, 5.0f));
+			physics->AddCollider(box);
+			physics->SetMass(0.0f);
+
+		}
+		GameObject::Sptr WallM2 = scene->CreateGameObject("Cieling"); {
+			WallM2->SetPostion(glm::vec3(5.410f, -4.350f, 2.0f));
+			WallM2->SetRotation(glm::vec3(-166.f, 137.f, 110.f));
+			WallM2->SetScale(glm::vec3(0.210f, 2.64f, 5.0f));
+			RenderComponent::Sptr renderer = WallM2->Add<RenderComponent>();
+			renderer->SetMesh(wallMesh);
+			renderer->SetMaterial(wallMaterial);
+
+			RigidBody::Sptr physics = WallM2->Add<RigidBody>(RigidBodyType::Dynamic);
+			BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(76.7f, 0.166f, 188.f));
+			box->SetScale(glm::vec3(0.210f, 2.64f, 5.0f));
+			physics->AddCollider(box);
+			physics->SetMass(0.0f);
+
+		}
+
+
+
+
 		TriggerVolume::Sptr volume2 = ballM->Add<TriggerVolume>();
 		// This is an example of attaching a component and setting some parameters
 		TriggerVolumeEnterBehaviour::Sptr behaviour = ballM->Add<TriggerVolumeEnterBehaviour>();
+
+		
 		
 		//volume2->OnEnteredTrigger(volume);
 		//volume2->OnLeavingTrigger(volume);

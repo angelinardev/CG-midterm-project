@@ -493,7 +493,7 @@ int main() {
 			BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(6.7f, 1.14f, 0.179f));
 			//BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(6.7f, 0.179f, 1.14f));
 			//box->SetPosition(playerM->GetPosition());
-			box->SetScale(glm::vec3(0.2f, 2.5f, 1.0f));
+			box->SetScale(glm::vec3(0.2f, 2.5f, 0.5f));
 			physics->AddCollider(box);
 			//physics->AddCollider(BoxCollider::Create());
 			physics->SetMass(0.0f);

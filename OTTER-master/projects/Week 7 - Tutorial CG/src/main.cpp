@@ -308,9 +308,9 @@ int main() {
 	bool loadScene = false;
 	// For now we can use a toggle to generate our scene vs load from file
 	if (loadScene) {
-		ResourceManager::LoadManifest("test1-manifest.json");
+		ResourceManager::LoadManifest("PlayX-manifest.json");
 		
-		scene = Scene::Load("test1.json");
+		scene = Scene::Load("PlayX.json");
 		std::string line;
 		std::ifstream myFile("bricks.txt");
 		if (myFile.is_open())
@@ -679,6 +679,16 @@ int main() {
 	ballM->Get<RigidBody>()->SetAngularFactor(glm::vec3(0.0f, 0.0f, 0.0f));
 	ballM->Get<RigidBody>()->SetAngularDamping(0.0f);
 
+	//add light to ball
+	Light ballLight = Light();
+	ballLight.Color = glm::vec3(0.0f, 1.0f, 1.0f);
+	ballLight.Range = 5.0f;
+	ballLight.Position = ballM->GetPosition();
+	scene->Lights.push_back(ballLight);
+	scene->SetupShaderAndLights();
+
+	
+
 	///// Game loop /////
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -708,8 +718,8 @@ int main() {
 					renderer->SetMaterial(blockMaterial);
 					// Add a dynamic rigid body to this block
 					RigidBody::Sptr physics = blockM->Add<RigidBody>(RigidBodyType::Dynamic);
-					BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(3.24f, 1.14f, 1.0f));
-					box->SetScale(glm::vec3(0.3f, 1.0f, 0.3f));
+					BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(3.24f, 1.0f, 1.14f));
+					box->SetScale(glm::vec3(0.2f, 0.3f, 0.2f));
 					physics->AddCollider(box);
 					physics->SetMass(0.0f);
 					// We'll add a behaviour that will interact with our trigger volumes
@@ -740,8 +750,8 @@ int main() {
 					renderer->SetMaterial(blockMaterial2);
 					// Add a dynamic rigid body to this block
 					RigidBody::Sptr physics = blockM->Add<RigidBody>(RigidBodyType::Dynamic);
-					BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(3.24f, 1.14f, 1.0f));
-					box->SetScale(glm::vec3(0.3f, 1.0f, 0.3f));
+					BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(3.24f, 1.0f, 1.14f));
+					box->SetScale(glm::vec3(0.2f, 0.3f, 0.2f));
 					physics->AddCollider(box);
 					physics->SetMass(0.0f);
 					// We'll add a behaviour that will interact with our trigger volumes
@@ -853,7 +863,9 @@ int main() {
 		if (balls <= 0)
 		{
 			//exit game
+			exit(0);
 		}
+		ballLight.Position = ballM->GetPosition();
 		
 		//check for collisions?
 

@@ -81,9 +81,10 @@ namespace Gameplay::Physics {
 				GetGameObject()->OnTriggerVolumeEntered(physicsPtr);
 			}
 			//go through the bricks, might need to adjust numbers
-			for (int i = 1; i <= _scene->brick_count; i++)
+			for (int i = 0; i < _scene->bricks.size(); i++)
 			{
-				if (_scene->FindObjectByName("Ball")->Get<RigidBody>() == physicsPtr && (GetGameObject()->Get<RigidBody>() == _scene->FindObjectByName("Block"+ std::to_string(i))->Get<RigidBody>()))
+
+				if (_scene->FindObjectByName("Ball")->Get<RigidBody>() == physicsPtr && (GetGameObject()->Get<RigidBody>() == _scene->bricks[i]->Get<RigidBody>()))
 				{
 					// Add the object to the known collisions for this frame
 					thisFrameCollision.push_back(physicsPtr);

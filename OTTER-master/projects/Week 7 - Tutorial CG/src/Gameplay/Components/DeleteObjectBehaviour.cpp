@@ -69,12 +69,17 @@ void DeleteObjectBehaviour::OnTriggerVolumeEntered(const std::shared_ptr<Gamepla
 			body->GetGameObject()->Get<RigidBody>()->ApplyImpulse(wForce);
 		}
 		//convoluted but whatever
+		_scene->bricks.erase(remove(_scene->bricks.begin(), _scene->bricks.end(), GetGameObject()), _scene->bricks.end());
 		_scene->DeleteGameObject(_scene->FindObjectByGUID(GetGameObject()->GUID));
+		//Objects.erase(remove(Objects.begin(), Objects.end(), _deletionQueue[i]), Objects.end());
+		
+		_scene->brick_count -= 1;
 	}
 	
 	
 	//increment points here
 	_scene->score += 1;
+	
 	
 }
 

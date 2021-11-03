@@ -308,9 +308,9 @@ int main() {
 	bool loadScene = false;
 	// For now we can use a toggle to generate our scene vs load from file
 	if (loadScene) {
-		ResourceManager::LoadManifest("scene1-manifest.json");
+		ResourceManager::LoadManifest("test1-manifest.json");
 		
-		scene = Scene::Load("scene1.json");
+		scene = Scene::Load("test1.json");
 		std::string line;
 		std::ifstream myFile("bricks.txt");
 		if (myFile.is_open())
@@ -696,6 +696,7 @@ int main() {
 			{
 				//count += 1;
 				scene->brick_count += 1;
+				
 				GameObject::Sptr blockM = scene->CreateGameObject("Block" + std::to_string(scene->brick_count));
 				{
 					blockM->SetPostion(glm::vec3(-1.5f, 0.0f, 1.0f));
@@ -719,6 +720,7 @@ int main() {
 					behaviour->ExitMaterial = blockMaterial;
 					
 				}
+				scene->bricks.push_back(blockM);
 			}
 			ImGui::Separator();
 			if (ImGui::Button("Add brick2"))
@@ -747,6 +749,7 @@ int main() {
 					behaviour->EnterMaterial = blockMaterial2;
 					behaviour->ExitMaterial = blockMaterial;
 				}
+				scene->bricks.push_back(blockM);
 			}
 			ImGui::Separator();
 		}

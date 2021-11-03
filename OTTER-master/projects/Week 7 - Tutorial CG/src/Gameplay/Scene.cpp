@@ -9,6 +9,7 @@
 #include "Gameplay/Physics/TriggerVolume.h"
 
 #include "Graphics/DebugDraw.h"
+#include <algorithm>
 
 namespace Gameplay {
 	Scene::Scene() :
@@ -116,7 +117,9 @@ namespace Gameplay {
 			for (int i=0; i< _deletionQueue.size(); i++)
 			{
 				//delete from objects
-				remove(Objects.begin(), Objects.end(), _deletionQueue[i]);
+				//remove(Objects.begin(), Objects.end(), _deletionQueue[i]);
+				Objects.erase(remove(Objects.begin(), Objects.end(), _deletionQueue[i]), Objects.end());
+				this->brick_count -= 1;
 			}
 			//empty queue each frame
 			_deletionQueue.clear();

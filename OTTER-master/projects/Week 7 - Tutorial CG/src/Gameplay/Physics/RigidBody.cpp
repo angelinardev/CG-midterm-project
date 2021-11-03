@@ -114,6 +114,11 @@ namespace Gameplay::Physics {
 
 	void RigidBody::SetLinearVelocity(const glm::vec3 &value) {
 		_body->setLinearVelocity(ToBt(value));
+		
+	}
+	void RigidBody::SetAngularFactor(const glm::vec3& value)
+	{
+		_body->setAngularFactor(ToBt(value));
 	}
 
 	glm::vec3 RigidBody::GetLinearVelocity() const {

@@ -235,7 +235,6 @@ bool DrawLightImGui(const Scene::Sptr& scene, const char* title, int ix) {
 }
 GLfloat movX = 0.0f;
 
-int count = 0;
 void keyboard() {
 
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
@@ -258,7 +257,6 @@ void keyboard() {
 //
 //}
 
-const glm::vec3 wForce = glm::vec3(0.0f, 0.2f, 0.0f);
 int main() {
 	Logger::Init(); // We'll borrow the logger from the toolkit, but we need to initialize it
 
@@ -514,6 +512,7 @@ int main() {
 			//sphere->SetPosition(ballM->GetPosition());
 			sphere->SetScale(glm::vec3(0.6f, 2.0f, 0.6f));
 			physics->AddCollider(sphere);
+			
 			//physics->ApplyImpulse(wForce);
 			//physics->ApplyForce(wForce);
 
@@ -670,6 +669,9 @@ int main() {
 	}
 	GameObject::Sptr playerM = scene->FindObjectByName("Player");
 	GameObject::Sptr ballM = scene->FindObjectByName("Ball");
+	//limit rotation
+	ballM->Get<RigidBody>()->SetAngularFactor(glm::vec3(0.0f, 0.0f, 0.0f));
+	ballM->Get<RigidBody>()->SetAngularDamping(0.0f);
 
 	///// Game loop /////
 	while (!glfwWindowShouldClose(window)) {
@@ -686,8 +688,9 @@ int main() {
 		{
 			if (ImGui::Button("Add brick"))
 			{
-				count += 1;
-				GameObject::Sptr blockM = scene->CreateGameObject("Block" + std::to_string(count));
+				//count += 1;
+				scene->brick_count += 1;
+				GameObject::Sptr blockM = scene->CreateGameObject("Block" + std::to_string(scene->brick_count));
 				{
 					blockM->SetPostion(glm::vec3(-1.5f, 0.0f, 1.0f));
 					blockM->SetRotation(glm::vec3(45.0f, 0.0f, 180.0f));
@@ -699,7 +702,7 @@ int main() {
 					// Add a dynamic rigid body to this block
 					RigidBody::Sptr physics = blockM->Add<RigidBody>(RigidBodyType::Dynamic);
 					BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(3.24f, 1.14f, 1.0f));
-					box->SetScale(glm::vec3(0.3f, 0.3f, 0.3f));
+					box->SetScale(glm::vec3(0.3f, 1.0f, 0.3f));
 					physics->AddCollider(box);
 					physics->SetMass(0.0f);
 					// We'll add a behaviour that will interact with our trigger volumes
@@ -712,8 +715,9 @@ int main() {
 			ImGui::Separator();
 			if (ImGui::Button("Add brick2"))
 			{
-				count += 1;
-				GameObject::Sptr blockM = scene->CreateGameObject("Block" + std::to_string(count));
+				//count += 1;
+				scene->brick_count += 1;
+				GameObject::Sptr blockM = scene->CreateGameObject("Block" + std::to_string(scene->brick_count));
 				{
 					blockM->SetPostion(glm::vec3(-1.5f, 0.0f, 1.0f));
 					blockM->SetRotation(glm::vec3(45.0f, 0.0f, 180.0f));
@@ -725,7 +729,7 @@ int main() {
 					// Add a dynamic rigid body to this block
 					RigidBody::Sptr physics = blockM->Add<RigidBody>(RigidBodyType::Dynamic);
 					BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(3.24f, 1.14f, 1.0f));
-					box->SetScale(glm::vec3(0.3f, 0.3f, 0.3f));
+					box->SetScale(glm::vec3(0.3f, 1.0f, 0.3f));
 					physics->AddCollider(box);
 					physics->SetMass(0.0f);
 					// We'll add a behaviour that will interact with our trigger volumes

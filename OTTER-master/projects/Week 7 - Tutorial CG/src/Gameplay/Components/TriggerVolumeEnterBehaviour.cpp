@@ -23,7 +23,6 @@ void TriggerVolumeEnterBehaviour::OnTriggerVolumeEntered(const std::shared_ptr<G
 	const glm::vec3 wForce = glm::vec3(dir.x, 0.0f, 1.0f);// * GetGameObject()->"Player";  //multiply by bodies velocity
 	GetGameObject()->Get<RigidBody>()->ApplyImpulse(wForce);
 	
-	GetGameObject()->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 }
 
 void TriggerVolumeEnterBehaviour::OnTriggerVolumeLeaving(const std::shared_ptr<Gameplay::Physics::RigidBody>& body) {
@@ -31,9 +30,6 @@ void TriggerVolumeEnterBehaviour::OnTriggerVolumeLeaving(const std::shared_ptr<G
 	_playerInTrigger = false;
 	//ballM->SetPostion(glm::vec3(ballM->GetPosition().x, 0.0f, ballM->GetPosition().z));
 	GetGameObject()->SetPostion(glm::vec3(GetGameObject()->GetPosition().x, 0.0f, GetGameObject()->GetPosition().z));
-	GetGameObject()->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
-	
-
 }
 
 void TriggerVolumeEnterBehaviour::RenderImGui() { }

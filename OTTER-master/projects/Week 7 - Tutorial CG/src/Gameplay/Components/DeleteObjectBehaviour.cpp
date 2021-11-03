@@ -33,7 +33,23 @@ void DeleteObjectBehaviour::OnTriggerVolumeEntered(const std::shared_ptr<Gamepla
 		_scene->DeleteGameObject(_scene->FindObjectByGUID(GetGameObject()->GUID));
 	}
 	//bounce ball back in opposite direction
+	glm::vec3 dir = body->GetGameObject()->GetPosition() - GetGameObject()->GetPosition();
+	//normalize
+	glm::float1 len = sqrt(pow(dir.x, 2) + pow(dir.y, 2) + pow(dir.z, 2));
+	dir = dir / len;
+	glm::vec3 wForce;
+	//this needs to be better?
+	if (body->GetLinearVelocity().z > 0) //positive, going up
+	{
+		wForce = glm::vec3(dir.x, 0.0f, -1.0f);
+	}
+	else //negative, going down
+	{
+		wForce = glm::vec3(dir.x, 0.0f, 1.0f);
+	}
 	
+	body->ApplyImpulse(wForce);
+	//increment points here
 	
 }
 

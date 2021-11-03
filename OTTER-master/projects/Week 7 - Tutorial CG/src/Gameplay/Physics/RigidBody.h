@@ -134,6 +134,8 @@ namespace Gameplay::Physics {
 
 		void SetLinearVelocity(const glm::vec3 &value);
 
+		void SetAngularFactor(const glm::vec3& value);
+
 		// Inherited from IComponent
 		virtual void Awake() override;
 		virtual void RenderImGui() override;

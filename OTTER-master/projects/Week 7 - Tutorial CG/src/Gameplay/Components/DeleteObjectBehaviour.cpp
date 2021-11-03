@@ -9,9 +9,10 @@
 
 using namespace Gameplay::Physics;
 DeleteObjectBehaviour::DeleteObjectBehaviour() :
-	IComponent()
+	IComponent(), EnterMaterial(nullptr),
+	ExitMaterial(nullptr)
 { 
-	//_scene = GetGameObject()->GetScene();
+	
 }
 DeleteObjectBehaviour::~DeleteObjectBehaviour() = default;
 
@@ -20,18 +21,67 @@ void DeleteObjectBehaviour::OnTriggerVolumeEntered(const std::shared_ptr<Gamepla
 {
 	LOG_INFO("Body has entered our trigger volume: {}", body->GetGameObject()->Name);
 	_playerInTrigger = true;
-	if (GetGameObject()->Get<RenderComponent>()->GetMaterial()->Name == "Block2")
+	//get our scene, delete this line later
+	_scene = GetGameObject()->GetScene();
+	if (GetGameObject()->Get<RenderComponent>()->GetMaterial() == EnterMaterial)
 	{
+		canBreak = false;
 		//swap material and then pass
-		
+		GetGameObject()->Get<RenderComponent>()->SetMaterial(ExitMaterial);
+		//bounce ball back in opposite direction
+		glm::vec3 dir = body->GetGameObject()->GetPosition() - GetGameObject()->GetPosition();
+		//normalize
+		glm::float1 len = sqrt(pow(dir.x, 2) + pow(dir.y, 2) + pow(dir.z, 2));
+		dir = dir / len;
+		//this needs to be better?
+		if (body->GetLinearVelocity().z > 0) //positive, going up
+		{
+			const glm::vec3 wForce = glm::vec3(dir.x, 0.0f, -10.0f);
+			body->SetLinearVelocity(glm::vec3(0.0, 0.0, 0.0));
+			body->GetGameObject()->Get<RigidBody>()->ApplyImpulse(wForce);
+		}
+		else //negative, going down
+		{
+			const glm::vec3 wForce = glm::vec3(dir.x, 0.0f, 10.0f);
+			body->SetLinearVelocity(glm::vec3(0.0, 0.0, 0.0));
+			body->GetGameObject()->Get<RigidBody>()->ApplyImpulse(wForce);
+		}
 	}
-	else
+	else if (canBreak)
 	{
 		//delete self
-		_scene = GetGameObject()->GetScene();
+		//bounce ball back in opposite direction
+		glm::vec3 dir = body->GetGameObject()->GetPosition() - GetGameObject()->GetPosition();
+		//normalize
+		glm::float1 len = sqrt(pow(dir.x, 2) + pow(dir.y, 2) + pow(dir.z, 2));
+		dir = dir / len;
+		//this needs to be better?
+		if (body->GetLinearVelocity().z > 0) //positive, going up
+		{
+			const glm::vec3 wForce = glm::vec3(dir.x, 0.0f, -10.0f);
+			body->SetLinearVelocity(glm::vec3(0.0, 0.0, 0.0));
+			body->GetGameObject()->Get<RigidBody>()->ApplyImpulse(wForce);
+		}
+		else //negative, going down
+		{
+			const glm::vec3 wForce = glm::vec3(dir.x, 0.0f, 10.0f);
+			body->SetLinearVelocity(glm::vec3(0.0, 0.0, 0.0));
+			body->GetGameObject()->Get<RigidBody>()->ApplyImpulse(wForce);
+		}
 		//convoluted but whatever
 		_scene->DeleteGameObject(_scene->FindObjectByGUID(GetGameObject()->GUID));
 	}
+	
+	
+	//increment points here
+	_scene->score += 1;
+	
+}
+
+void DeleteObjectBehaviour::OnTriggerVolumeLeaving(const std::shared_ptr<Gameplay::Physics::RigidBody> & body) {
+	LOG_INFO("Body has left our trigger volume: {}", body->GetGameObject()->Name);
+	_playerInTrigger = false;
+	canBreak = true;
 	//bounce ball back in opposite direction
 	glm::vec3 dir = body->GetGameObject()->GetPosition() - GetGameObject()->GetPosition();
 	//normalize
@@ -47,15 +97,8 @@ void DeleteObjectBehaviour::OnTriggerVolumeEntered(const std::shared_ptr<Gamepla
 	{
 		wForce = glm::vec3(dir.x, 0.0f, 1.0f);
 	}
-	
-	body->ApplyImpulse(wForce);
-	//increment points here
-	
-}
 
-void DeleteObjectBehaviour::OnTriggerVolumeLeaving(const std::shared_ptr<Gameplay::Physics::RigidBody> & body) {
-	LOG_INFO("Body has left our trigger volume: {}", body->GetGameObject()->Name);
-	_playerInTrigger = false;
+	body->ApplyImpulse(wForce);
 }
 
 void DeleteObjectBehaviour::RenderImGui() { }

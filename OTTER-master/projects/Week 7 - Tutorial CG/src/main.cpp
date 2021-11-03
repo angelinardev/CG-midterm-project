@@ -258,6 +258,9 @@ void keyboard() {
 //}
 
 int main() {
+	//how many balls we have left
+	int balls = 3;
+	
 	Logger::Init(); // We'll borrow the logger from the toolkit, but we need to initialize it
 
 	//Initialize GLFW
@@ -491,7 +494,7 @@ int main() {
 			BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(6.7f, 1.14f, 0.179f));
 			//BoxCollider::Sptr box = BoxCollider::Create(glm::vec3(6.7f, 0.179f, 1.14f));
 			//box->SetPosition(playerM->GetPosition());
-			box->SetScale(glm::vec3(0.2f, 2.5f, 0.5f));
+			box->SetScale(glm::vec3(0.2f, 1.5f, 0.2f));
 			physics->AddCollider(box);
 			//physics->AddCollider(BoxCollider::Create());
 			physics->SetMass(0.0f);
@@ -615,6 +618,8 @@ int main() {
 		scene->Save("scene.json");
 		scene->brick_count = 0;
 	}
+	//our score
+	scene->score = 0;
 
 	// Call scene awake to start up all of our components
 	scene->Window = window;
@@ -667,6 +672,7 @@ int main() {
 		ballMaterial->Shininess = 1.0f;
 
 	}
+	ResourceManager::SaveManifest("manifest.json");
 	GameObject::Sptr playerM = scene->FindObjectByName("Player");
 	GameObject::Sptr ballM = scene->FindObjectByName("Ball");
 	//limit rotation
@@ -709,6 +715,8 @@ int main() {
 					TriggerVolume::Sptr volume = blockM->Add<TriggerVolume>();
 					// This is an example of attaching a component and setting some parameters
 					DeleteObjectBehaviour::Sptr behaviour = blockM->Add<DeleteObjectBehaviour>();
+					behaviour->EnterMaterial = blockMaterial2;
+					behaviour->ExitMaterial = blockMaterial;
 					
 				}
 			}
@@ -736,6 +744,8 @@ int main() {
 					TriggerVolume::Sptr volume = blockM->Add<TriggerVolume>();
 					// This is an example of attaching a component and setting some parameters
 					DeleteObjectBehaviour::Sptr behaviour = blockM->Add<DeleteObjectBehaviour>();
+					behaviour->EnterMaterial = blockMaterial2;
+					behaviour->ExitMaterial = blockMaterial;
 				}
 			}
 			ImGui::Separator();
@@ -815,7 +825,8 @@ int main() {
 			// Split lights from the objects in ImGui
 			ImGui::Separator();
 		}
-		ballM->SetPostion(glm::vec3(ballM->GetPosition().x, 0.0f, ballM->GetPosition().z));
+		//ballM->SetPostion(glm::vec3(ballM->GetPosition().x, 0.0f, ballM->GetPosition().z));
+		ballM->SetPostionZ(0.0f);
 	//	glm::vec3 test = playerM->Get<RigidBody>()->GetLinearVelocity();
 		//ballM->Get<RigidBody>()->SetLinearVelocity(test);
 		dt *= playbackSpeed;
@@ -825,6 +836,17 @@ int main() {
 		//move player
 		keyboard();
 		playerM->SetPostion(glm::vec3(movX, 0.0f, -5.0f));
+		if (ballM->GetPosition().z < -6.0f)
+		{
+			balls -= 1;
+			//reset ball's position
+			ballM->SetPostion(glm::vec3(0.0f, 0.0f, 1.0f));
+			ballM->Get<RigidBody>()->SetLinearVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+		}
+		if (balls <= 0)
+		{
+			//exit game
+		}
 		
 		//check for collisions?
 

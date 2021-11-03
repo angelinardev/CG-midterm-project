@@ -162,6 +162,7 @@ namespace Gameplay {
 		GameObject::Sptr GetObjectByIndex(int index) const;
 
 		int brick_count;
+		int score;
 
 	protected:
 		// Bullet physics stuff world

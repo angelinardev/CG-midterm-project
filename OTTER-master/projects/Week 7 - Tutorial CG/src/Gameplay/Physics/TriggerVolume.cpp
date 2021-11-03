@@ -81,17 +81,20 @@ namespace Gameplay::Physics {
 				GetGameObject()->OnTriggerVolumeEntered(physicsPtr);
 			}
 			//go through the bricks, might need to adjust numbers
-			for (int i = 0; i < _scene->bricks.size(); i++)
+			for (int i = 0; i < _scene->NumObjects(); i++)
 			{
-
-				if (_scene->FindObjectByName("Ball")->Get<RigidBody>() == physicsPtr && (GetGameObject()->Get<RigidBody>() == _scene->bricks[i]->Get<RigidBody>()))
+				if (_scene->GetObjectByIndex(i)->Name[2] == 'o')
 				{
-					// Add the object to the known collisions for this frame
-					thisFrameCollision.push_back(physicsPtr);
-					std::cout << "\nCOLLISION HAS HAPPENED\n";
-					physicsPtr->GetGameObject()->OnEnteredTrigger(std::dynamic_pointer_cast<TriggerVolume>(SelfRef().lock()));
-					GetGameObject()->OnTriggerVolumeEntered(physicsPtr);
+					if (_scene->FindObjectByName("Ball")->Get<RigidBody>() == physicsPtr && (GetGameObject()->Get<RigidBody>() == _scene->GetObjectByIndex(i)->Get<RigidBody>()))
+					{
+						// Add the object to the known collisions for this frame
+						thisFrameCollision.push_back(physicsPtr);
+						std::cout << "\nCOLLISION HAS HAPPENED\n";
+						physicsPtr->GetGameObject()->OnEnteredTrigger(std::dynamic_pointer_cast<TriggerVolume>(SelfRef().lock()));
+						GetGameObject()->OnTriggerVolumeEntered(physicsPtr);
+					}
 				}
+				
 			}
 			// Get the contact pair and resolve contact manifolds
 			btBroadphasePair* pair = &collisionPairs[i];

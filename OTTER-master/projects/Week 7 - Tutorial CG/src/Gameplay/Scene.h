@@ -163,7 +163,10 @@ namespace Gameplay {
 
 		int brick_count;
 		int score;
-		std::vector<GameObject::Sptr> bricks;
+		//std::vector<GameObject::Sptr> getBricks();
+		//void addBricks(GameObject::Sptr b);
+
+		
 
 	protected:
 		// Bullet physics stuff world
@@ -189,6 +192,7 @@ namespace Gameplay {
 
 		// Stores all the objects in our scene
 		std::vector<GameObject::Sptr>  Objects;
+		//std::vector<GameObject::Sptr> bricks;
 		
 		glm::vec3 _ambientLight;
 		std::vector<GameObject::Sptr> _deletionQueue;

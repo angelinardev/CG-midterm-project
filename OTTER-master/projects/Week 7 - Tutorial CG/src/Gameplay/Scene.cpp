@@ -14,6 +14,7 @@
 namespace Gameplay {
 	Scene::Scene() :
 		Objects(std::vector<GameObject::Sptr>()),
+		//bricks(std::vector<GameObject::Sptr>()),
 		Lights(std::vector<Light>()),
 		IsPlaying(false),
 		MainCamera(nullptr),
@@ -28,6 +29,7 @@ namespace Gameplay {
 
 	Scene::~Scene() {
 		Objects.clear();
+		//bricks.clear();
 		_CleanupPhysics();
 	}
 
@@ -165,6 +167,11 @@ namespace Gameplay {
 		for (auto& object : data["objects"]) {
 			result->Objects.push_back(GameObject::FromJson(object, result.get()));
 		}
+		//// Make sure the scene has bricks, then load them all in!
+		//LOG_ASSERT(data["Bricks"].is_array(), "bricks not present in scene!");
+		//for (auto& object : data["Bricks"]) {
+		//	result->bricks.push_back(GameObject::FromJson(object, result.get()));
+		//}
 
 		// Make sure the scene has lights, then load all
 		LOG_ASSERT(data["lights"].is_array(), "Lights not present in scene!");
@@ -191,6 +198,14 @@ namespace Gameplay {
 			objects[ix] = Objects[ix]->ToJson();
 		}
 		blob["objects"] = objects;
+
+		// Save renderables 2
+		/*std::vector<nlohmann::json> Bricks;
+		objects.resize(bricks.size());
+		for (int ix = 0; ix < bricks.size(); ix++) {
+			Bricks[ix] = bricks[ix]->ToJson();
+		}
+		blob["Bricks"] = Bricks;*/
 
 		// Save lights
 		std::vector<nlohmann::json> lights;
@@ -230,6 +245,17 @@ namespace Gameplay {
 	GameObject::Sptr Scene::GetObjectByIndex(int index) const {
 		return Objects[index];
 	}
+
+	/*std::vector<GameObject::Sptr> Scene::getBricks()
+	{
+		return bricks;
+	}*/
+
+
+	//void Scene::addBricks(GameObject::Sptr b)
+	//{
+	//	bricks.push_back(b);
+	//}
 
 	void Scene::_InitPhysics() {
 		_collisionConfig = new btDefaultCollisionConfiguration();

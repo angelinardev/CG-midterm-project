@@ -718,9 +718,11 @@ int main() {
 					DeleteObjectBehaviour::Sptr behaviour = blockM->Add<DeleteObjectBehaviour>();
 					behaviour->EnterMaterial = blockMaterial2;
 					behaviour->ExitMaterial = blockMaterial;
+
+					//scene->addBricks(blockM);
 					
 				}
-				scene->bricks.push_back(blockM);
+				
 			}
 			ImGui::Separator();
 			if (ImGui::Button("Add brick2"))
@@ -748,8 +750,10 @@ int main() {
 					DeleteObjectBehaviour::Sptr behaviour = blockM->Add<DeleteObjectBehaviour>();
 					behaviour->EnterMaterial = blockMaterial2;
 					behaviour->ExitMaterial = blockMaterial;
+
+					//scene->addBricks(blockM);
 				}
-				scene->bricks.push_back(blockM);
+				
 			}
 			ImGui::Separator();
 		}

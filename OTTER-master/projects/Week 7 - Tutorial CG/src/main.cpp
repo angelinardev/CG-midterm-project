@@ -624,7 +624,7 @@ int main() {
 		// Scale up the plane
 		plane->SetScale(glm::vec3(10.0F));
 		plane->SetRotation(glm::vec3(45.0f, 0.0f, 180.0f));
-		plane->SetPostion(glm::vec3(0.0f, -3.82f, -3.94f));
+		plane->SetPostion(glm::vec3(0.0f, -3.75f, -3.92f));
 
 		// Create and attach a RenderComponent to the object to draw our mesh
 		RenderComponent::Sptr renderer = plane->Add<RenderComponent>();

@@ -89,7 +89,10 @@ void DeleteObjectBehaviour::OnTriggerVolumeEntered(const std::shared_ptr<Gamepla
 	
 	
 	//increment points here
-
+	if (_scene->score >= 18)
+	{
+		std::cout << "Congrats, u won!\n";
+	}
 	_scene->need_update = true;
 	
 	

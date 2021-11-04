@@ -104,7 +104,7 @@ GLFWwindow* window;
 // The current size of our window in pixels
 glm::ivec2 windowSize = glm::ivec2(800, 800);
 // The title of our GLFW window
-std::string windowTitle = "INFR-1350U";
+std::string windowTitle = "Brick Breaker-PLAY";
 
 
 //PLAYER SCORE
@@ -310,8 +310,8 @@ int main() {
 	bool loadScene = true;
 	// For now we can use a toggle to generate our scene vs load from file
 	if (loadScene) {
-		ResourceManager::LoadManifest("Brick Brea-manifest.json");
-		scene = Scene::Load("Brick Breaker.json");
+		ResourceManager::LoadManifest("Brick_Brea-manifest.json");
+		scene = Scene::Load("Brick_Breaker.json");
 		std::string line;
 		std::ifstream myFile("bricks.txt");
 		if (myFile.is_open())
@@ -710,8 +710,8 @@ int main() {
 	scene->Lights.push_back(pLight);
 	scene->SetupShaderAndLights();
 
-	
-
+	//force game to play
+	scene->IsPlaying = true;
 	///// Game loop /////
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -902,6 +902,7 @@ int main() {
 		if (balls <= 0)
 		{
 			//exit game
+			std::cout << "Game over!\n";
 			exit(0);
 		}
 		//set lights

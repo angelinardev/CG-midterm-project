@@ -11,7 +11,7 @@ using namespace Gameplay::Physics;
 DeleteObjectBehaviour::DeleteObjectBehaviour() :
 	IComponent()
 { 
-
+	
 }
 DeleteObjectBehaviour::~DeleteObjectBehaviour() = default;
 
@@ -56,6 +56,7 @@ void DeleteObjectBehaviour::OnTriggerVolumeEntered(const std::shared_ptr<Gamepla
 			body->SetLinearVelocity(glm::vec3(0.0, 0.0, 0.0));
 			body->GetGameObject()->Get<RigidBody>()->ApplyImpulse(wForce);
 		}
+		_scene->score += 1;
 	}
 	else if (canBreak)
 	{
@@ -82,13 +83,13 @@ void DeleteObjectBehaviour::OnTriggerVolumeEntered(const std::shared_ptr<Gamepla
 		//_scene->getBricks().erase(remove(_scene->getBricks().begin(), _scene->getBricks().end(), GetGameObject()), _scene->getBricks().end());
 		_scene->DeleteGameObject(_scene->FindObjectByGUID(GetGameObject()->GUID));
 		//Objects.erase(remove(Objects.begin(), Objects.end(), _deletionQueue[i]), Objects.end());
-		
+		_scene->score += 1;
 		_scene->brick_count -= 1;
 	}
 	
 	
 	//increment points here
-	_scene->score += 1;
+
 	_scene->need_update = true;
 	
 	

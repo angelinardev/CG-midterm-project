@@ -1,3 +1,5 @@
+//Abdalla Mohamed - 100795120, Angelina Ratchkov – 100740576
+
 #include <Logging.h>
 #include <iostream>
 #include <fstream>
@@ -305,11 +307,11 @@ int main() {
 	glCullFace(GL_BACK);
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 
-	bool loadScene = false;
+	bool loadScene = true;
 	// For now we can use a toggle to generate our scene vs load from file
 	if (loadScene) {
-		ResourceManager::LoadManifest("PlayMe2-manifest.json");
-		scene = Scene::Load("PlayMe2.json");
+		ResourceManager::LoadManifest("Brick Brea-manifest.json");
+		scene = Scene::Load("Brick Breaker.json");
 		std::string line;
 		std::ifstream myFile("bricks.txt");
 		if (myFile.is_open())
@@ -870,9 +872,12 @@ int main() {
 		//ballM->Get<RigidBody>()->SetLinearVelocity(test);
 		dt *= playbackSpeed;
 		//change plane background based on players current number of balls and score
+	
 		if (scene->need_update)
 		{
+			
 			plane->Get<RenderComponent>()->GetMaterial()->Texture = ResourceManager::CreateAsset<Texture2D>("textures/L" + std::to_string(balls) + "P" + std::to_string(scene->score) + ".png");
+			
 			scene->need_update = false;
 		}
 		//move player
@@ -885,6 +890,14 @@ int main() {
 			//reset ball's position
 			ballM->SetPostion(glm::vec3(0.0f, 0.0f, 1.0f));
 			ballM->Get<RigidBody>()->SetLinearVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+		}
+
+
+		//Makes sure it doesn't go overbound
+		if (ballM->GetPosition().z >= 7.0f) {
+			ballM->SetPostion(glm::vec3(ballM->GetPosition().x, ballM->GetPosition().y, 6.9f));
+			ballM->Get<RigidBody>()->SetLinearVelocity(glm::vec3(2.0f, 0.0f, -2.0f));
+			
 		}
 		if (balls <= 0)
 		{
@@ -968,3 +981,4 @@ int main() {
 	Logger::Uninitialize();
 	return 0;
 }
+

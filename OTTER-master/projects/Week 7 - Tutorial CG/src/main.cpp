@@ -305,11 +305,11 @@ int main() {
 	glCullFace(GL_BACK);
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 
-	bool loadScene = true;
+	bool loadScene = false;
 	// For now we can use a toggle to generate our scene vs load from file
 	if (loadScene) {
-		ResourceManager::LoadManifest("test3-manifest.json");
-		scene = Scene::Load("test3.json");
+		ResourceManager::LoadManifest("PlayMe2-manifest.json");
+		scene = Scene::Load("PlayMe2.json");
 		std::string line;
 		std::ifstream myFile("bricks.txt");
 		if (myFile.is_open())
@@ -604,12 +604,6 @@ int main() {
 	scene->score = 0;
 
 	Texture2D::Sptr planeTex = ResourceManager::CreateAsset<Texture2D>("textures/L3P0.png");
-	Texture2D::Sptr planeTexL3P1 = ResourceManager::CreateAsset<Texture2D>("textures/L3P1.png");
-	Texture2D::Sptr planeTexL3P2 = ResourceManager::CreateAsset<Texture2D>("textures/L3P2.png");
-	Texture2D::Sptr planeTexL3P3 = ResourceManager::CreateAsset<Texture2D>("textures/L3P3.png");
-	Texture2D::Sptr planeTexL3P4 = ResourceManager::CreateAsset<Texture2D>("textures/L3P4.png");
-	Texture2D::Sptr planeTexL3P5 = ResourceManager::CreateAsset<Texture2D>("textures/L3P5.png");
-	Texture2D::Sptr planeTexL3P6 = ResourceManager::CreateAsset<Texture2D>("textures/L3P6.png");
 	// We'll create a mesh that is a simple plane that we can resize later
 	MeshResource::Sptr planeMesh = ResourceManager::CreateAsset<MeshResource>();
 	planeMesh->AddParam(MeshBuilderParam::CreatePlane(ZERO, UNIT_Z, UNIT_X, glm::vec2(1.0f)));
@@ -875,13 +869,19 @@ int main() {
 	//	glm::vec3 test = playerM->Get<RigidBody>()->GetLinearVelocity();
 		//ballM->Get<RigidBody>()->SetLinearVelocity(test);
 		dt *= playbackSpeed;
-		plane->Get<RenderComponent>()->GetMaterial()->Texture = ResourceManager::CreateAsset<Texture2D>("textures/L" + std::to_string(balls) + "P" + std::to_string(scene->score)+".png");
+		//change plane background based on players current number of balls and score
+		if (scene->need_update)
+		{
+			plane->Get<RenderComponent>()->GetMaterial()->Texture = ResourceManager::CreateAsset<Texture2D>("textures/L" + std::to_string(balls) + "P" + std::to_string(scene->score) + ".png");
+			scene->need_update = false;
+		}
 		//move player
 		keyboard();
 		playerM->SetPostion(glm::vec3(movX, 0.0f, -5.0f));
 		if (ballM->GetPosition().z < -6.0f)
 		{
 			balls -= 1;
+			scene->need_update = true;
 			//reset ball's position
 			ballM->SetPostion(glm::vec3(0.0f, 0.0f, 1.0f));
 			ballM->Get<RigidBody>()->SetLinearVelocity(glm::vec3(0.0f, 0.0f, 0.0f));

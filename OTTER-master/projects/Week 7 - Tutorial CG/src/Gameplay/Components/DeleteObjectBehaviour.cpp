@@ -88,7 +88,9 @@ void DeleteObjectBehaviour::OnTriggerVolumeEntered(const std::shared_ptr<Gamepla
 	
 	
 	//increment points here
-	GetGameObject()->GetScene()->score += 1;
+	_scene->score += 1;
+	_scene->need_update = true;
+	
 	
 	
 }

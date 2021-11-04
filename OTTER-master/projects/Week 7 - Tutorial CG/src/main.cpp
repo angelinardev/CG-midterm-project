@@ -305,12 +305,11 @@ int main() {
 	glCullFace(GL_BACK);
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 
-	bool loadScene = false;
+	bool loadScene = true;
 	// For now we can use a toggle to generate our scene vs load from file
 	if (loadScene) {
-		ResourceManager::LoadManifest("PlayX-manifest.json");
-		
-		scene = Scene::Load("PlayX.json");
+		ResourceManager::LoadManifest("test3-manifest.json");
+		scene = Scene::Load("test3.json");
 		std::string line;
 		std::ifstream myFile("bricks.txt");
 		if (myFile.is_open())
@@ -325,7 +324,7 @@ int main() {
 		{
 			scene->brick_count = 0;
 		}
-		
+
 	}
 	else {
 		// Create our OpenGL resources
@@ -342,6 +341,7 @@ int main() {
 
 		MeshResource::Sptr wallMesh = ResourceManager::CreateAsset<MeshResource>("Wall.obj");
 		Texture2D::Sptr wallTex = ResourceManager::CreateAsset<Texture2D>("textures/Wall.png");
+		
 
 		
 		// Create an empty scene
@@ -374,7 +374,7 @@ int main() {
 			wallMaterial->Texture = wallTex;
 			wallMaterial->Shininess = 1.0f;
 		}
-
+		
 		// Create some lights for our scene
 		scene->Lights.resize(3);
 		scene->Lights[0].Position = glm::vec3(0.0f, 8.50f, 3.0f);
@@ -387,11 +387,7 @@ int main() {
 		scene->Lights[2].Position = glm::vec3(0.0f, 1.0f, 3.0f);
 		scene->Lights[2].Color = glm::vec3(1.0f, 0.2f, 0.1f);
 
-		// We'll create a mesh that is a simple plane that we can resize later
-		MeshResource::Sptr planeMesh = ResourceManager::CreateAsset<MeshResource>();
-		planeMesh->AddParam(MeshBuilderParam::CreatePlane(ZERO, UNIT_Z, UNIT_X, glm::vec2(1.0f)));
-		planeMesh->GenerateMesh();
-
+		
 		// Set up the scene's camera
 		GameObject::Sptr camera = scene->CreateGameObject("Main Camera");
 		{
@@ -406,21 +402,7 @@ int main() {
 			
 		}
 
-		// Set up all our sample objects
-		//GameObject::Sptr plane = scene->CreateGameObject("Plane");
-		//{
-		//	// Scale up the plane
-		//	plane->SetScale(glm::vec3(10.0F));
-
-		//	// Create and attach a RenderComponent to the object to draw our mesh
-		//	RenderComponent::Sptr renderer = plane->Add<RenderComponent>();
-		//	renderer->SetMesh(planeMesh);
-		//	renderer->SetMaterial(boxMaterial);
-
-		//	// Attach a plane collider that extends infinitely along the X/Y axis
-		//	RigidBody::Sptr physics = plane->Add<RigidBody>(/*static by default*/);
-		//	physics->AddCollider(PlaneCollider::Create());
-		//}
+		
 
 		//GameObject::Sptr square = scene->CreateGameObject("Square");
 		//{
@@ -621,6 +603,43 @@ int main() {
 	//our score
 	scene->score = 0;
 
+	Texture2D::Sptr planeTex = ResourceManager::CreateAsset<Texture2D>("textures/L3P0.png");
+	Texture2D::Sptr planeTexL3P1 = ResourceManager::CreateAsset<Texture2D>("textures/L3P1.png");
+	Texture2D::Sptr planeTexL3P2 = ResourceManager::CreateAsset<Texture2D>("textures/L3P2.png");
+	Texture2D::Sptr planeTexL3P3 = ResourceManager::CreateAsset<Texture2D>("textures/L3P3.png");
+	Texture2D::Sptr planeTexL3P4 = ResourceManager::CreateAsset<Texture2D>("textures/L3P4.png");
+	Texture2D::Sptr planeTexL3P5 = ResourceManager::CreateAsset<Texture2D>("textures/L3P5.png");
+	Texture2D::Sptr planeTexL3P6 = ResourceManager::CreateAsset<Texture2D>("textures/L3P6.png");
+	// We'll create a mesh that is a simple plane that we can resize later
+	MeshResource::Sptr planeMesh = ResourceManager::CreateAsset<MeshResource>();
+	planeMesh->AddParam(MeshBuilderParam::CreatePlane(ZERO, UNIT_Z, UNIT_X, glm::vec2(1.0f)));
+	planeMesh->GenerateMesh();
+	Material::Sptr planeMaterial = ResourceManager::CreateAsset<Material>(); {
+		planeMaterial->Name = "Plane";
+		planeMaterial->MatShader = scene->BaseShader;
+		planeMaterial->Texture = planeTex;
+		planeMaterial->Shininess = 1.0f;
+	}
+
+
+	// Set up all our sample objects
+	GameObject::Sptr plane = scene->CreateGameObject("Plane");
+	{
+		// Scale up the plane
+		plane->SetScale(glm::vec3(10.0F));
+		plane->SetRotation(glm::vec3(45.0f, 0.0f, 180.0f));
+		plane->SetPostion(glm::vec3(0.0f, -3.82f, -3.94f));
+
+		// Create and attach a RenderComponent to the object to draw our mesh
+		RenderComponent::Sptr renderer = plane->Add<RenderComponent>();
+		renderer->SetMesh(planeMesh);
+		renderer->SetMaterial(planeMaterial);
+
+		// Attach a plane collider that extends infinitely along the X/Y axis
+		RigidBody::Sptr physics = plane->Add<RigidBody>(/*static by default*/);
+		physics->AddCollider(PlaneCollider::Create());
+	}
+
 	// Call scene awake to start up all of our components
 	scene->Window = window;
 	scene->Awake();
@@ -681,10 +700,18 @@ int main() {
 
 	//add light to ball
 	Light ballLight = Light();
-	ballLight.Color = glm::vec3(0.0f, 1.0f, 1.0f);
+	ballLight.Color = glm::vec3(0.0f, 1.0f, 0.0f);
 	ballLight.Range = 5.0f;
 	ballLight.Position = ballM->GetPosition();
 	scene->Lights.push_back(ballLight);
+	scene->SetupShaderAndLights();
+
+	//add light to player
+	Light pLight = Light();
+	pLight.Color = glm::vec3(1.0f, 0.0f, 0.0f);
+	pLight.Range = 5.0f;
+	pLight.Position = playerM->GetPosition();
+	scene->Lights.push_back(pLight);
 	scene->SetupShaderAndLights();
 
 	
@@ -727,9 +754,9 @@ int main() {
 					TriggerVolume::Sptr volume = blockM->Add<TriggerVolume>();
 					// This is an example of attaching a component and setting some parameters
 					DeleteObjectBehaviour::Sptr behaviour = blockM->Add<DeleteObjectBehaviour>();
-					behaviour->EnterMaterial = blockMaterial2;
-					behaviour->ExitMaterial = blockMaterial;
-
+					behaviour->setEnter(blockMaterial2);
+					behaviour->setExit(blockMaterial);
+					
 					//scene->addBricks(blockM);
 					
 				}
@@ -759,8 +786,8 @@ int main() {
 					TriggerVolume::Sptr volume = blockM->Add<TriggerVolume>();
 					// This is an example of attaching a component and setting some parameters
 					DeleteObjectBehaviour::Sptr behaviour = blockM->Add<DeleteObjectBehaviour>();
-					behaviour->EnterMaterial = blockMaterial2;
-					behaviour->ExitMaterial = blockMaterial;
+					behaviour->setEnter(blockMaterial2);
+					behaviour->setExit(blockMaterial);
 
 					//scene->addBricks(blockM);
 				}
@@ -848,9 +875,7 @@ int main() {
 	//	glm::vec3 test = playerM->Get<RigidBody>()->GetLinearVelocity();
 		//ballM->Get<RigidBody>()->SetLinearVelocity(test);
 		dt *= playbackSpeed;
-
-		
-
+		plane->Get<RenderComponent>()->GetMaterial()->Texture = ResourceManager::CreateAsset<Texture2D>("textures/L" + std::to_string(balls) + "P" + std::to_string(scene->score)+".png");
 		//move player
 		keyboard();
 		playerM->SetPostion(glm::vec3(movX, 0.0f, -5.0f));
@@ -866,7 +891,9 @@ int main() {
 			//exit game
 			exit(0);
 		}
+		//set lights
 		ballLight.Position = ballM->GetPosition();
+		pLight.Position = playerM->GetPosition();
 		
 		//check for collisions?
 

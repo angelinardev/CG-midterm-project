@@ -20,7 +20,18 @@ void TriggerVolumeEnterBehaviour::OnTriggerVolumeEntered(const std::shared_ptr<G
 	//normalize
 	glm::float1 len = sqrt(pow(dir.x, 2) + pow(dir.y, 2) + pow(dir.z, 2));
 	dir = dir / len;
-	const glm::vec3 wForce = glm::vec3(dir.x, 0.0f, 2.0f);// * GetGameObject()->"Player";  //multiply by bodies velocity
+	glm::vec3 wForce = glm::vec3(dir.x, 0.0f, 2.0f);// * GetGameObject()->"Player";  //multiply by bodies velocity
+	if (body->GetGameObject()->Name == "Wall1")
+	{
+		wForce = glm::vec3(-0.8f, 0.0f, dir.y);// * GetGameObject()->"Player";  //multiply by bodies velocity
+		GetGameObject()->Get<RigidBody>()->ApplyImpulse(wForce);
+	}
+	else if (body->GetGameObject()->Name == "Wall2")
+	{
+		wForce = glm::vec3(0.8f, 0.0f, dir.y);// * GetGameObject()->"Player";  //multiply by bodies velocity
+		
+	}
+	
 	GetGameObject()->Get<RigidBody>()->ApplyImpulse(wForce);
 	
 }

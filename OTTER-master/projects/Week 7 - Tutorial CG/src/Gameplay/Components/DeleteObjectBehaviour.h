@@ -22,10 +22,9 @@ public:
 	DeleteObjectBehaviour();
 	virtual ~DeleteObjectBehaviour();
 
-	// Inherited from IComponent
-	Gameplay::Material::Sptr        EnterMaterial;
-	Gameplay::Material::Sptr        ExitMaterial;
-
+	
+	void setEnter(Gameplay::Material::Sptr v);
+	void setExit(Gameplay::Material::Sptr  v);
 
 	virtual void OnTriggerVolumeEntered(const std::shared_ptr<Gameplay::Physics::RigidBody>& body) override;
 	virtual void OnTriggerVolumeLeaving(const std::shared_ptr<Gameplay::Physics::RigidBody>& body) override;
@@ -38,4 +37,8 @@ protected:
 	bool _playerInTrigger;
 	Scene* _scene;
 	bool canBreak = true;
+
+	// Inherited from IComponent
+	Gameplay::Material::Sptr        EnterMaterial;
+	Gameplay::Material::Sptr        ExitMaterial;
 };

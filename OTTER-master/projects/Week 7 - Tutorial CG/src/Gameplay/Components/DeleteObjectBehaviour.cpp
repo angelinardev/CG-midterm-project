@@ -9,12 +9,21 @@
 
 using namespace Gameplay::Physics;
 DeleteObjectBehaviour::DeleteObjectBehaviour() :
-	IComponent(), EnterMaterial(nullptr),
-	ExitMaterial(nullptr)
+	IComponent()
 { 
-	
+
 }
 DeleteObjectBehaviour::~DeleteObjectBehaviour() = default;
+
+void DeleteObjectBehaviour::setEnter(Gameplay::Material::Sptr v)
+{
+	EnterMaterial = v;
+}
+
+void DeleteObjectBehaviour::setExit(Gameplay::Material::Sptr v)
+{
+	ExitMaterial = v;
+}
 
 
 void DeleteObjectBehaviour::OnTriggerVolumeEntered(const std::shared_ptr<Gameplay::Physics::RigidBody> & body)
@@ -23,7 +32,8 @@ void DeleteObjectBehaviour::OnTriggerVolumeEntered(const std::shared_ptr<Gamepla
 	_playerInTrigger = true;
 	//get our scene, delete this line later
 	_scene = GetGameObject()->GetScene();
-	if (GetGameObject()->Get<RenderComponent>()->GetMaterial() == EnterMaterial)
+	
+	if (GetGameObject()->Get<RenderComponent>()->GetMaterial()->Name == "Block2")
 	{
 		canBreak = false;
 		//swap material and then pass
@@ -36,13 +46,13 @@ void DeleteObjectBehaviour::OnTriggerVolumeEntered(const std::shared_ptr<Gamepla
 		//this needs to be better?
 		if (body->GetLinearVelocity().z > 0) //positive, going up
 		{
-			const glm::vec3 wForce = glm::vec3(dir.x, 0.0f, -10.0f);
+			const glm::vec3 wForce = glm::vec3(dir.x, 0.0f, -5.0f);
 			body->SetLinearVelocity(glm::vec3(0.0, 0.0, 0.0));
 			body->GetGameObject()->Get<RigidBody>()->ApplyImpulse(wForce);
 		}
 		else //negative, going down
 		{
-			const glm::vec3 wForce = glm::vec3(dir.x, 0.0f, 10.0f);
+			const glm::vec3 wForce = glm::vec3(dir.x, 0.0f, 5.0f);
 			body->SetLinearVelocity(glm::vec3(0.0, 0.0, 0.0));
 			body->GetGameObject()->Get<RigidBody>()->ApplyImpulse(wForce);
 		}
@@ -58,13 +68,13 @@ void DeleteObjectBehaviour::OnTriggerVolumeEntered(const std::shared_ptr<Gamepla
 		//this needs to be better?
 		if (body->GetLinearVelocity().z > 0) //positive, going up
 		{
-			const glm::vec3 wForce = glm::vec3(dir.x, 0.0f, -10.0f);
+			const glm::vec3 wForce = glm::vec3(dir.x, 0.0f, -5.0f);
 			body->SetLinearVelocity(glm::vec3(0.0, 0.0, 0.0));
 			body->GetGameObject()->Get<RigidBody>()->ApplyImpulse(wForce);
 		}
 		else //negative, going down
 		{
-			const glm::vec3 wForce = glm::vec3(dir.x, 0.0f, 10.0f);
+			const glm::vec3 wForce = glm::vec3(dir.x, 0.0f, 5.0f);
 			body->SetLinearVelocity(glm::vec3(0.0, 0.0, 0.0));
 			body->GetGameObject()->Get<RigidBody>()->ApplyImpulse(wForce);
 		}
@@ -78,41 +88,29 @@ void DeleteObjectBehaviour::OnTriggerVolumeEntered(const std::shared_ptr<Gamepla
 	
 	
 	//increment points here
-	_scene->score += 1;
+	GetGameObject()->GetScene()->score += 1;
 	
 	
+}
+nlohmann::json DeleteObjectBehaviour::ToJson() const {
+	return {
+		{ "enter_material", EnterMaterial != nullptr ? EnterMaterial->GetGUID().str() : "null" },
+		{ "exit_material", ExitMaterial != nullptr ? ExitMaterial->GetGUID().str() : "null" }
+	};
+}
+
+DeleteObjectBehaviour::Sptr DeleteObjectBehaviour::FromJson(const nlohmann::json& blob) {
+	DeleteObjectBehaviour::Sptr result = std::make_shared<DeleteObjectBehaviour>();
+	result->EnterMaterial = ResourceManager::Get<Gameplay::Material>(Guid(blob["enter_material"]));
+	result->ExitMaterial = ResourceManager::Get<Gameplay::Material>(Guid(blob["exit_material"]));
+	return result;
 }
 
 void DeleteObjectBehaviour::OnTriggerVolumeLeaving(const std::shared_ptr<Gameplay::Physics::RigidBody> & body) {
 	LOG_INFO("Body has left our trigger volume: {}", body->GetGameObject()->Name);
 	_playerInTrigger = false;
 	canBreak = true;
-	//bounce ball back in opposite direction
-	glm::vec3 dir = body->GetGameObject()->GetPosition() - GetGameObject()->GetPosition();
-	//normalize
-	glm::float1 len = sqrt(pow(dir.x, 2) + pow(dir.y, 2) + pow(dir.z, 2));
-	dir = dir / len;
-	glm::vec3 wForce;
-	//this needs to be better?
-	if (body->GetLinearVelocity().z > 0) //positive, going up
-	{
-		wForce = glm::vec3(dir.x, 0.0f, -1.0f);
-	}
-	else //negative, going down
-	{
-		wForce = glm::vec3(dir.x, 0.0f, 1.0f);
-	}
-
-	body->ApplyImpulse(wForce);
 }
 
 void DeleteObjectBehaviour::RenderImGui() { }
 
-nlohmann::json DeleteObjectBehaviour::ToJson() const {
-	return { };
-}
-
-DeleteObjectBehaviour::Sptr DeleteObjectBehaviour::FromJson(const nlohmann::json & blob) {
-	DeleteObjectBehaviour::Sptr result = std::make_shared<DeleteObjectBehaviour>();
-	return result;
-}

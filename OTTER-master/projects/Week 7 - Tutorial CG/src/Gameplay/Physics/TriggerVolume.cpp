@@ -80,6 +80,23 @@ namespace Gameplay::Physics {
 				physicsPtr->GetGameObject()->OnEnteredTrigger(std::dynamic_pointer_cast<TriggerVolume>(SelfRef().lock()));
 				GetGameObject()->OnTriggerVolumeEntered(physicsPtr);
 			}
+			if (_scene->FindObjectByName("Wall1")->Get<RigidBody>() == physicsPtr && (GetGameObject()->Get<RigidBody>() == _scene->FindObjectByName("Ball")->Get<RigidBody>()))
+			{
+				// Add the object to the known collisions for this frame
+				thisFrameCollision.push_back(physicsPtr);
+				std::cout << "\nCOLLISION HAS HAPPENED\n";
+				physicsPtr->GetGameObject()->OnEnteredTrigger(std::dynamic_pointer_cast<TriggerVolume>(SelfRef().lock()));
+				GetGameObject()->OnTriggerVolumeEntered(physicsPtr);
+			}
+			if (_scene->FindObjectByName("Wall2")->Get<RigidBody>() == physicsPtr && (GetGameObject()->Get<RigidBody>() == _scene->FindObjectByName("Ball")->Get<RigidBody>()))
+			{
+				// Add the object to the known collisions for this frame
+				thisFrameCollision.push_back(physicsPtr);
+				std::cout << "\nCOLLISION HAS HAPPENED\n";
+				physicsPtr->GetGameObject()->OnEnteredTrigger(std::dynamic_pointer_cast<TriggerVolume>(SelfRef().lock()));
+				GetGameObject()->OnTriggerVolumeEntered(physicsPtr);
+			}
+			
 			//go through the bricks, might need to adjust numbersd
 			for (int i = 0; i < _scene->NumObjects(); i++)
 			{

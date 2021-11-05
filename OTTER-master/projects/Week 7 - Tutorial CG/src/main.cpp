@@ -504,7 +504,7 @@ int main() {
 			//physics->ApplyForce(wForce);
 
 		}
-
+		
 		GameObject::Sptr WallM = scene->CreateGameObject("Wall1"); {
 			WallM->SetPostion(glm::vec3(5.410f, 0.370f, 2.0f));
 			WallM->SetRotation(glm::vec3(-113.f, -91.f, 113.f));
@@ -596,45 +596,106 @@ int main() {
 		//	volume->AddCollider(collider);
 		//}
 
+
+		Texture2D::Sptr planeTex = ResourceManager::CreateAsset<Texture2D>("textures/L3P0.png");
+		// We'll create a mesh that is a simple plane that we can resize later
+		MeshResource::Sptr planeMesh = ResourceManager::CreateAsset<MeshResource>();
+		planeMesh->AddParam(MeshBuilderParam::CreatePlane(ZERO, UNIT_Z, UNIT_X, glm::vec2(1.0f)));
+		planeMesh->GenerateMesh();
+		Material::Sptr planeMaterial = ResourceManager::CreateAsset<Material>(); {
+			planeMaterial->Name = "Plane";
+			planeMaterial->MatShader = scene->BaseShader;
+			planeMaterial->Texture = planeTex;
+			planeMaterial->Shininess = 1.0f;
+		}
+
+
+		// Set up all our sample objects
+		GameObject::Sptr plane = scene->CreateGameObject("Plane");
+		{
+			// Scale up the plane
+			plane->SetScale(glm::vec3(10.0F));
+			plane->SetRotation(glm::vec3(45.0f, 0.0f, 180.0f));
+			plane->SetPostion(glm::vec3(0.0f, -3.75f, -3.92f));
+
+			// Create and attach a RenderComponent to the object to draw our mesh
+			RenderComponent::Sptr renderer = plane->Add<RenderComponent>();
+			renderer->SetMesh(planeMesh);
+			renderer->SetMaterial(planeMaterial);
+
+			// Attach a plane collider that extends infinitely along the X/Y axis
+			RigidBody::Sptr physics = plane->Add<RigidBody>(/*static by default*/);
+			physics->AddCollider(PlaneCollider::Create());
+		}
+		//block stuff 
+		MeshResource::Sptr blockMesh = ResourceManager::CreateAsset<MeshResource>("Brick.obj");
+		Texture2D::Sptr blockTex = ResourceManager::CreateAsset<Texture2D>("textures/Brick1.png");
+		Texture2D::Sptr blockTex2 = ResourceManager::CreateAsset<Texture2D>("textures/Brick2.png");
+		//create material 
+		Material::Sptr blockMaterial = ResourceManager::CreateAsset<Material>();
+		{
+			blockMaterial->Name = "Block";
+			blockMaterial->MatShader = scene->BaseShader;
+			blockMaterial->Texture = blockTex;
+			blockMaterial->Shininess = 1.0f;
+		}
+		//create material2 
+		Material::Sptr blockMaterial2 = ResourceManager::CreateAsset<Material>();
+		{
+			blockMaterial2->Name = "Block2";
+			blockMaterial2->MatShader = scene->BaseShader;
+			blockMaterial2->Texture = blockTex2;
+			blockMaterial2->Shininess = 1.0f;
+		}
+		//sample block
+		GameObject::Sptr blockMT = scene->CreateGameObject("TestBlock");
+		{
+			blockMT->SetPostion(glm::vec3(-1.5f, 0.0f, 1.0f));
+			blockMT->SetRotation(glm::vec3(45.0f, 0.0f, 180.0f));
+			blockMT->SetScale(glm::vec3(0.3f, 0.3f, 0.3f));
+			// Add a render component
+			RenderComponent::Sptr renderer = blockMT->Add<RenderComponent>();
+			renderer->SetMesh(blockMesh);
+			renderer->SetMaterial(blockMaterial);
+		}
+		//sample block2
+		GameObject::Sptr blockMT2 = scene->CreateGameObject("TestBlock2");
+		{
+			blockMT2->SetPostion(glm::vec3(-1.5f, 0.0f, 1.0f));
+			blockMT2->SetRotation(glm::vec3(45.0f, 0.0f, 180.0f));
+			blockMT2->SetScale(glm::vec3(0.3f, 0.3f, 0.3f));
+			// Add a render component
+			RenderComponent::Sptr renderer = blockMT->Add<RenderComponent>();
+			renderer->SetMesh(blockMesh);
+			renderer->SetMaterial(blockMaterial2);
+		}
+
+		//add light to ball
+		Light ballLight = Light();
+		ballLight.Color = glm::vec3(0.0f, 1.0f, 0.0f);
+		ballLight.Range = 5.0f;
+		ballLight.Position = ballM->GetPosition();
+		scene->Lights.push_back(ballLight);
+		scene->SetupShaderAndLights();
+
+		//add light to player
+		Light pLight = Light();
+		pLight.Color = glm::vec3(1.0f, 0.0f, 0.0f);
+		pLight.Range = 5.0f;
+		pLight.Position = playerM->GetPosition();
+		scene->Lights.push_back(pLight);
+		scene->SetupShaderAndLights();
 		// Save the asset manifest for all the resources we just loaded
 		ResourceManager::SaveManifest("manifest.json");
 		// Save the scene to a JSON file
 		scene->Save("scene.json");
 		scene->brick_count = 0;
+
 	}
 	//our score
 	scene->score = 0;
 
-	Texture2D::Sptr planeTex = ResourceManager::CreateAsset<Texture2D>("textures/L3P0.png");
-	// We'll create a mesh that is a simple plane that we can resize later
-	MeshResource::Sptr planeMesh = ResourceManager::CreateAsset<MeshResource>();
-	planeMesh->AddParam(MeshBuilderParam::CreatePlane(ZERO, UNIT_Z, UNIT_X, glm::vec2(1.0f)));
-	planeMesh->GenerateMesh();
-	Material::Sptr planeMaterial = ResourceManager::CreateAsset<Material>(); {
-		planeMaterial->Name = "Plane";
-		planeMaterial->MatShader = scene->BaseShader;
-		planeMaterial->Texture = planeTex;
-		planeMaterial->Shininess = 1.0f;
-	}
-
-
-	// Set up all our sample objects
-	GameObject::Sptr plane = scene->CreateGameObject("Plane");
-	{
-		// Scale up the plane
-		plane->SetScale(glm::vec3(10.0F));
-		plane->SetRotation(glm::vec3(45.0f, 0.0f, 180.0f));
-		plane->SetPostion(glm::vec3(0.0f, -3.75f, -3.92f));
-
-		// Create and attach a RenderComponent to the object to draw our mesh
-		RenderComponent::Sptr renderer = plane->Add<RenderComponent>();
-		renderer->SetMesh(planeMesh);
-		renderer->SetMaterial(planeMaterial);
-
-		// Attach a plane collider that extends infinitely along the X/Y axis
-		RigidBody::Sptr physics = plane->Add<RigidBody>(/*static by default*/);
-		physics->AddCollider(PlaneCollider::Create());
-	}
+	
 
 	// Call scene awake to start up all of our components
 	scene->Window = window;
@@ -658,58 +719,21 @@ int main() {
 
 	nlohmann::json editorSceneState;
 
-	//block stuff 
-	MeshResource::Sptr blockMesh = ResourceManager::CreateAsset<MeshResource>("Brick.obj");
-	Texture2D::Sptr blockTex = ResourceManager::CreateAsset<Texture2D>("textures/Brick1.png");
-	Texture2D::Sptr blockTex2 = ResourceManager::CreateAsset<Texture2D>("textures/Brick2.png");
-	//create material 
-	Material::Sptr blockMaterial = ResourceManager::CreateAsset<Material>();
-	{
-		blockMaterial->Name = "Block";
-		blockMaterial->MatShader = scene->BaseShader;
-		blockMaterial->Texture = blockTex;
-		blockMaterial->Shininess = 1.0f;
-	}
-	//create material2 
-	Material::Sptr blockMaterial2 = ResourceManager::CreateAsset<Material>();
-	{
-		blockMaterial2->Name = "Block2";
-		blockMaterial2->MatShader = scene->BaseShader;
-		blockMaterial2->Texture = blockTex2;
-		blockMaterial2->Shininess = 1.0f;
-	}
-	Texture2D::Sptr ballTex = ResourceManager::CreateAsset<Texture2D>("textures/Player.png");
-	Material::Sptr ballMaterial = ResourceManager::CreateAsset<Material>();
-	{
-		ballMaterial->Name = "Ball";
-		ballMaterial->MatShader = scene->BaseShader;
-		ballMaterial->Texture = ballTex;
-		ballMaterial->Shininess = 1.0f;
-
-	}
-	ResourceManager::SaveManifest("manifest.json");
+	//fetch resources
 	GameObject::Sptr playerM = scene->FindObjectByName("Player");
 	GameObject::Sptr ballM = scene->FindObjectByName("Ball");
+	GameObject::Sptr plane = scene->FindObjectByName("Plane");
+	Light ballLight = scene->Lights[2];
+	Light pLight = scene->Lights[3];
+	//these are already loaded in
+	Material::Sptr blockMaterial = scene->FindObjectByName("Block11")->Get<RenderComponent>()->GetMaterial();
+	Material::Sptr blockMaterial2 = scene->FindObjectByName("Block9")->Get<RenderComponent>()->GetMaterial();
+	MeshResource::Sptr blockMesh = scene->FindObjectByName("Block11")->Get<RenderComponent>()->GetMeshResource();
+
 	//limit rotation
 	ballM->Get<RigidBody>()->SetAngularFactor(glm::vec3(0.0f, 0.0f, 0.0f));
 	ballM->Get<RigidBody>()->SetAngularDamping(0.0f);
-
-	//add light to ball
-	Light ballLight = Light();
-	ballLight.Color = glm::vec3(0.0f, 1.0f, 0.0f);
-	ballLight.Range = 5.0f;
-	ballLight.Position = ballM->GetPosition();
-	scene->Lights.push_back(ballLight);
-	scene->SetupShaderAndLights();
-
-	//add light to player
-	Light pLight = Light();
-	pLight.Color = glm::vec3(1.0f, 0.0f, 0.0f);
-	pLight.Range = 5.0f;
-	pLight.Position = playerM->GetPosition();
-	scene->Lights.push_back(pLight);
-	scene->SetupShaderAndLights();
-
+	
 	//force game to play
 	scene->IsPlaying = true;
 	///// Game loop /////
